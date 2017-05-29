@@ -3,8 +3,8 @@ import random
 
 """ Setup """
 # Window resolution
-xres = 640
-yres = 480
+xres = 800
+yres = 600
 # Colors
 black = (0x00, 0x00, 0x00)
 green = (0x00, 0xFF, 0x00)
