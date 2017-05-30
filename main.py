@@ -1,48 +1,38 @@
 import pygame
-import random
 
-""" Setup """
-# Window resolution
-xres = 800
-yres = 600
-# Colors
-black = (0x00, 0x00, 0x00)
-green = (0x00, 0xFF, 0x00)
-white = (0xFF, 0xFF, 0xFF)
-yllow = (0xFF, 0xFF, 0x00)
-# Screen and game font
+# Our libraries.
+import tile
+
+# Tile map.
+floor = pygame.image.load("Objects/Floor.png")
+# World tiles are represented as a dictionary of tuples.
+# The dictionary maps the screen coordinate to the tile map coordinate.
+world = {
+    (0,0):(0,3), (1,0):(1,3), (2,0):(2,3),
+    (0,1):(0,4), (1,1):(1,4), (2,1):(2,4),
+    (0,2):(0,5), (1,2):(1,5), (2,2):(2,5),
+}
+
+# Setup.
+# The world is a 3x3 grid of tiles.
+# The screen size must be the same.
 pygame.init()
-font = pygame.font.Font("Fonts/alterebro-pixel-font.ttf", 32)
-screen = pygame.display.set_mode((xres, yres))
+screen = pygame.display.set_mode(tile.size((3, 3)))
 pygame.display.set_caption("Cleric")
-screen.fill(black)
-""" Loop """
+# Game loop.
+# Consists of three stages: Input, Data, and Output.
+# Input manipulates Data. Data manipulates Output.
 done = False
 while not done:
-    """ Input """
+    # Input.
     for event in pygame.event.get():
-        # User pushed X to close window
         if event.type == pygame.QUIT:
             done = True
-        # User pushed F1 to close window
-        if event.type == pygame.KEYUP:
-            if event.key == pygame.K_F1:
-                done = True
-    """ Data """
-    # Buffers a circle at a random point
-    x = random.randint(0, xres)
-    y = random.randint(0, yres)
-    pygame.draw.circle(screen, green, (x, y), 8, 1)
-    # Buffers a message at the top left
-    label = font.render("Heya Sarch", True, yllow)
-    x = 20
-    y = 20
-    screen.blit(label, (x, y))
-    """ Output """
-    # Renders buffer to display
+    # Data.
+    for key, value in world.iteritems():
+        screen.blit(floor, tile.rect(key), tile.rect(value))
+    # Output.
     pygame.display.flip()
-    # Locks the screen to a 60 Hz refresh rate
-    fps = 60
-    pygame.time.wait(1000 / fps)
-# Done - Clean up
+    pygame.time.wait(16)
+# End.
 pygame.quit()
