@@ -4,8 +4,7 @@ import pygame
 import tile
 
 # Tile map.
-# Loads a tile map and doubles the size of the tilemap
-# from its native 16x16 resolution to 32x32.
+# Loads a tile map and doubles size from native 16x16 to 32x32.
 floor = pygame.image.load("Objects/Floor.png")
 floor = pygame.transform.scale2x(floor)
 # World tiles are represented as a dictionary of tuples.
