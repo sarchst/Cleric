@@ -1,5 +1,5 @@
-# Tiles are 16 pixels by 16 pixels wide.
-width = 16
+# Tiles are 32 pixels by 32 pixels wide.
+width = 32
 
 def size((x, y)):
     """
