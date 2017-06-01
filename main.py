@@ -18,7 +18,7 @@ world = {
 # The world is a 3x3 grid of tiles.
 # The screen size must be the same.
 pygame.init()
-screen = pygame.display.set_mode(tile.size((3, 3)))
+screen = pygame.display.set_mode(tile.size((10, 10)))
 pygame.display.set_caption("Cleric")
 # Game loop.
 # Consists of three stages: Input, Data, and Output.
