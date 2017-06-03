@@ -1,18 +1,12 @@
 import pygame
-
-# Our libraries.
 import tile
 
-# Tile map.
-# Loads a tile map and doubles size from native 16x16 to 32x32.
-floor = pygame.image.load("Objects/Floor.png")
-floor = pygame.transform.scale2x(floor)
-
-cats = pygame.transform.scale2x(pygame.image.load("Characters/Cat0.png"))
+# Tile maps.
+floor = pygame.transform.scale2x(pygame.image.load("Objects/Floor.png"))
+cats  = pygame.transform.scale2x(pygame.image.load("Characters/Cat0.png"))
 trees = pygame.transform.scale2x(pygame.image.load("Objects/Tree1.png"))
 
-# World tiles are represented as a dictionary of tuples.
-# The dictionary maps the screen coordinate to the tile map coordinate.
+# Screen coordinates to tile map coordinates.
 world = {
     (0,0):(8,7), (1,0):(8,7), (2,0):(3,4), (3,0):(8,7), (4,0):(8,7), (5,0):(8,7), (6,0):(8,7), (7,0):(9,7), (8,0):(14,19), (9,0):(15,19),
     (0,1):(8,7), (1,1):(8,7), (2,1):(3,4), (3,1):(8,7), (4,1):(8,7), (5,1):(8,7), (6,1):(8,7), (7,1):(9,7), (8,1):(14,20), (9,1):(15,20),
@@ -25,18 +19,12 @@ world = {
     (0,8):(8,7), (1,8):(8,7), (2,8):(8,7), (3,8):(8,7), (4,8):(8,7), (5,8):(10,17), (6,8):(7,16), (7,8):(8,16), (8,8):(8,16), (9,8):(9,16),
     (0,9):(8,7), (1,9):(8,7), (2,9):(8,7), (3,9):(8,7), (4,9):(8,7), (5,9):(8,7), (6,9):(7,17), (7,9):(8,17), (8,9):(8,17), (9,9):(9,17),
 }
+
 # Setup.
-# The world is a 3x3 grid of tiles.
-# The screen size must be the same.
 pygame.init()
 screen = pygame.display.set_mode(tile.size((10, 10)))
 pygame.display.set_caption("Cleric")
-# Game loop.
-# Consists of three stages: Input, Data, and Output.
-# Input, from the keyboard or mouse, manipulates game Data.
-# Game Data manipulates the display and/or audio - the Output.
-# The entire game loop is done in 60 frames per second.
-# 60 FPS is fairly appealing to the human senses, and also CPU friendly.
+
 done = False
 while not done:
     # Input.
@@ -71,6 +59,5 @@ while not done:
     pygame.display.flip()
     pygame.time.wait(16)
 
-
-# End.
+# Cleanup.
 pygame.quit()
