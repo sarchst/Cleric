@@ -45,7 +45,7 @@ while not done:
             done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
             mx, my = pygame.mouse.get_pos()
-            print (mx/32), (my/32)
+            print "("+str((mx/tile.width))+","+str((my/tile.width))+")"
 
     # Data.
     for key, value in world.iteritems():
