@@ -4,10 +4,11 @@ import tile
 # Tile maps.
 floor = pygame.transform.scale2x(pygame.image.load("Objects/Floor.png"))
 cats  = pygame.transform.scale2x(pygame.image.load("Characters/Cat0.png"))
+cats1 = pygame.transform.scale2x(pygame.image.load("Characters/Cat1.png"))
 trees = pygame.transform.scale2x(pygame.image.load("Objects/Tree1.png"))
 
 # Screen coordinates to tile map coordinates.
-world = {
+terrain = {
     (0,0):(8,7), (1,0):(8,7), (2,0):(3,4), (3,0):(8,7), (4,0):(8,7), (5,0):(8,7), (6,0):(8,7), (7,0):(9,7), (8,0):(14,19), (9,0):(15,19),
     (0,1):(8,7), (1,1):(8,7), (2,1):(3,4), (3,1):(8,7), (4,1):(8,7), (5,1):(8,7), (6,1):(8,7), (7,1):(9,7), (8,1):(14,20), (9,1):(15,20),
     (0,2):(8,7), (1,2):(8,7), (2,2):(3,4), (3,2):(8,7), (4,2):(8,7), (5,2):(8,7), (6,2):(8,7), (7,2):(8,7), (8,2):(8,6), (9,2):(8,6),
@@ -20,10 +21,16 @@ world = {
     (0,9):(8,7), (1,9):(8,7), (2,9):(8,7), (3,9):(8,7), (4,9):(8,7), (5,9):(8,7), (6,9):(7,17), (7,9):(8,17), (8,9):(8,17), (9,9):(9,17),
 }
 
+sprites = {
+    (9,6):(1,1), (8,7):(1,2), (6,6):(2,2), (7,9):(2,1), (8,9):(1,3), (9,7):(2,3), (9,9):(2,0)
+}
+
 # Setup.
 pygame.init()
 screen = pygame.display.set_mode(tile.size((10, 10)))
 pygame.display.set_caption("Cleric")
+
+x = True
 
 done = False
 while not done:
@@ -32,28 +39,23 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
+            #print coordinates to terminal
             mx, my = pygame.mouse.get_pos()
-            print "("+str((mx/tile.width))+","+str((my/tile.width))+")"
+            print "(" + str((mx/tile.width)) + "," + str((my/tile.width)) + ")"
+            #place grass tile
+            terrain[((mx/tile.width), (my/tile.width))] = (8,7)
 
     # Data.
-    for key, value in world.iteritems():
+    for key, value in terrain.iteritems():
         screen.blit(floor, tile.rect(key), tile.rect(value))
 
-    screen.blit(cats,tile.rect((9,6)), tile.rect((1,1)))
-    screen.blit(cats,tile.rect((8,7)), tile.rect((1,2)))
-    screen.blit(cats,tile.rect((6,6)), tile.rect((2,2)))
-    screen.blit(cats,tile.rect((7,9)), tile.rect((2,1)))
-    screen.blit(cats,tile.rect((8,9)), tile.rect((1,3)))
-    screen.blit(cats,tile.rect((9,7)), tile.rect((2,3)))
-    screen.blit(cats,tile.rect((9,9)), tile.rect((2,0)))
-
-    screen.blit(trees, tile.rect((0,0)), tile.rect((0,3)))
-    screen.blit(trees, tile.rect((1,0)), tile.rect((0,3)))
-    screen.blit(trees, tile.rect((3,0)), tile.rect((0,3)))
-    screen.blit(trees, tile.rect((4,0)), tile.rect((0,3)))
-    screen.blit(trees, tile.rect((3,1)), tile.rect((0,3)))
-    screen.blit(trees, tile.rect((1,1)), tile.rect((0,3)))
-    screen.blit(trees, tile.rect((3,1)), tile.rect((0,3)))
+    if x:
+        for key, value in sprites.iteritems():
+            screen.blit(cats, tile.rect(key), tile.rect(value))
+    else:
+        for key, value in sprites.iteritems():
+            screen.blit(cats1, tile.rect(key), tile.rect(value))
+    x = not x
 
     # Output.
     pygame.display.flip()
