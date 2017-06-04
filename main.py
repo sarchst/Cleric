@@ -1,13 +1,21 @@
 import pygame
 import tile
 
-# Tile maps.
-floor = pygame.transform.scale2x(pygame.image.load("Objects/Floor.png"))
-cats  = pygame.transform.scale2x(pygame.image.load("Characters/Cat0.png"))
-cats1 = pygame.transform.scale2x(pygame.image.load("Characters/Cat1.png"))
-trees = pygame.transform.scale2x(pygame.image.load("Objects/Tree1.png"))
+"""
+Tile maps
+"""
+floor = [
+    pygame.transform.scale2x(pygame.image.load("Objects/Floor.png")),
+    pygame.transform.scale2x(pygame.image.load("Objects/Floor.png"))
+]
+cats = [
+    pygame.transform.scale2x(pygame.image.load("Characters/Cat0.png")),
+    pygame.transform.scale2x(pygame.image.load("Characters/Cat1.png"))
+]
 
-# Screen coordinates to tile map coordinates.
+"""
+World Data
+"""
 terrain = {
     (0,0):(8,7), (1,0):(8,7), (2,0):(3,4), (3,0):(8,7), (4,0):(8,7), (5,0):(8,7), (6,0):(8,7), (7,0):(9,7), (8,0):(14,19), (9,0):(15,19),
     (0,1):(8,7), (1,1):(8,7), (2,1):(3,4), (3,1):(8,7), (4,1):(8,7), (5,1):(8,7), (6,1):(8,7), (7,1):(9,7), (8,1):(14,20), (9,1):(15,20),
@@ -20,46 +28,72 @@ terrain = {
     (0,8):(8,7), (1,8):(8,7), (2,8):(8,7), (3,8):(8,7), (4,8):(8,7), (5,8):(10,17), (6,8):(7,16), (7,8):(8,16), (8,8):(8,16), (9,8):(9,16),
     (0,9):(8,7), (1,9):(8,7), (2,9):(8,7), (3,9):(8,7), (4,9):(8,7), (5,9):(8,7), (6,9):(7,17), (7,9):(8,17), (8,9):(8,17), (9,9):(9,17),
 }
-
 sprites = {
-    (9,6):(1,1), (8,7):(1,2), (6,6):(2,2), (7,9):(2,1), (8,9):(1,3), (9,7):(2,3), (9,9):(2,0)
-}
+    (9,6):(1,1),
+    (8,7):(1,2),
+    (6,6):(2,2),
+    (7,9):(2,1),
+    (8,9):(1,3),
+    (9,7):(2,3),
+    (9,9):(2,0),
+    # HINT: That missing pygame.init() warning wasn't much help, was it?
+    # I wonder where that missing curlyboy went...
 
-# Setup.
+"""
+Setup
+"""
 pygame.init()
 screen = pygame.display.set_mode(tile.size((10, 10)))
 pygame.display.set_caption("Cleric")
 
-x = True
-
+"""
+Game loop
+"""
+# Frame rendered since game start.
+frames = 0
+# Frames per second to run the game loop.
+fps = 60
+# Renders one frame every loop.
 done = False
 while not done:
-    # Input.
+    """
+    Input
+    """
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
-            #print coordinates to terminal
+            # Print coordinates to terminal.
             mx, my = pygame.mouse.get_pos()
-            print "(" + str((mx/tile.width)) + "," + str((my/tile.width)) + ")"
-            #place grass tile
-            terrain[((mx/tile.width), (my/tile.width))] = (8,7)
+            click = mx / tile.width, my / tile.width
+            print click
+            # Place grass tile.
+            terrain[click] = (8,7)
 
-    # Data.
+    """
+    Data
+    """
+    # The frame animation to select - will be either 0 or 1. Changes every half second.
+    x = (frames / fps) % 2
+
+    # Terrain.
     for key, value in terrain.iteritems():
-        screen.blit(floor, tile.rect(key), tile.rect(value))
+        screen.blit(floor[x], tile.rect(key), tile.rect(value))
 
-    if x:
-        for key, value in sprites.iteritems():
-            screen.blit(cats, tile.rect(key), tile.rect(value))
-    else:
-        for key, value in sprites.iteritems():
-            screen.blit(cats1, tile.rect(key), tile.rect(value))
-    x = not x
+    # Sprites.
+    for key, value in sprites.iteritems():
+        screen.blit(cats[x], tile.rect(key), tile.rect(value))
 
-    # Output.
+    """
+    Output
+    """
     pygame.display.flip()
-    pygame.time.wait(16)
+    pygame.time.wait(1000 / fps)
 
-# Cleanup.
+    # Onto the next frame.
+    frames = frames + 1
+
+"""
+Cleanup
+"""
 pygame.quit()
