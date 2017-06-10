@@ -36,8 +36,7 @@ sprites = {
     (8,9):(1,3),
     (9,7):(2,3),
     (9,9):(2,0),
-    # HINT: That missing pygame.init() warning wasn't much help, was it?
-    # I wonder where that missing curlyboy went...
+}
 
 """
 Setup
@@ -54,11 +53,18 @@ frames = 0
 # Frames per second to run the game loop.
 fps = 60
 # Renders one frame every loop.
+
 done = False
+left = 1
+right = 3
+mainScreen = True
+catScreen = False
+
 while not done:
     """
     Input
     """
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
@@ -67,22 +73,38 @@ while not done:
             mx, my = pygame.mouse.get_pos()
             click = mx / tile.width, my / tile.width
             print click
-            # Place grass tile.
-            terrain[click] = (8,7)
+
+            if event.button == right:
+                catScreen = True
+                mainScreen = False
+            elif event.button == left and catScreen:
+                choice = click
+                catScreen = False
+                mainScreen = True
+            elif "choice" in locals() and not catScreen:
+                sprites[click] = choice
+            else:
+                terrain[click] = (8,7)
+
 
     """
     Data
     """
+
     # The frame animation to select - will be either 0 or 1. Changes every half second.
     x = (frames / fps) % 2
 
+    # Cat Menu
+    if catScreen:
+        screen.fill((0,0,0))
+        screen.blit(cats[x], (0,0))
     # Terrain.
-    for key, value in terrain.iteritems():
-        screen.blit(floor[x], tile.rect(key), tile.rect(value))
-
+    elif mainScreen:
+        for key, value in terrain.iteritems():
+            screen.blit(floor[x], tile.rect(key), tile.rect(value))
     # Sprites.
-    for key, value in sprites.iteritems():
-        screen.blit(cats[x], tile.rect(key), tile.rect(value))
+        for key, value in sprites.iteritems():
+            screen.blit(cats[x], tile.rect(key), tile.rect(value))
 
     """
     Output
