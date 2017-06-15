@@ -1,4 +1,5 @@
 import pygame
+
 # Tiles are 32 pixels by 32 pixels wide.
 width = 32
 
@@ -18,6 +19,7 @@ floor = [
     pygame.transform.scale2x(pygame.image.load("Objects/Floor.png")),
     pygame.transform.scale2x(pygame.image.load("Objects/Floor.png"))
 ]
+
 cats = [
     pygame.transform.scale2x(pygame.image.load("Characters/Cat0.png")),
     pygame.transform.scale2x(pygame.image.load("Characters/Cat1.png"))
