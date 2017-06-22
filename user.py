@@ -31,7 +31,9 @@ def keyboard(event):
     global done
     if event.type == pygame.QUIT:
         done = True
-
+    elif event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_F5:
+            zone.save(zone.terrain, zone.sprites)
 def getInput():
     for event in pygame.event.get():
         mouse(event)
