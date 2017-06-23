@@ -1,15 +1,14 @@
 import pickle
 
-def load(terrain_dict, sprites_dict):
-    terrainFile = open("home.terrain", "r")
-    spritesFile = open("home.sprites", "r")
-    return pickle.load(terrainFile), pickle.load(spritesFile)
 
-def save(terrain_dict, sprites_dict):
-    terrainFile = open("home.terrain", 'w')
-    pickle.dump(terrain_dict, terrainFile)
-    spritesFile = open("home.sprites", 'w')
-    pickle.dump(sprites_dict, spritesFile)
+def load(name):
+    global terrain, sprites 
+    terrain = pickle.load(open(name + ".terrain", "r"))
+    sprites = pickle.load(open(name + ".sprites", "r"))
+
+def save(name):
+    pickle.dump(terrain, open(name + ".terrain", 'w'))
+    pickle.dump(sprites, open(name + ".sprites", 'w'))
 
 
 terrain = {}

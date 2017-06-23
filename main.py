@@ -27,7 +27,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode(tile.pixel((10, 10)))
     pygame.display.set_caption("Cleric")
-    zone.terrain, zone.sprites = zone.load(zone.terrain, zone.sprites)
+    zone.load("Zones/home")
     """
     Game loop
     """
