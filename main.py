@@ -9,6 +9,8 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode(tile.pixel((40, 30)))
     pygame.display.set_caption("Cleric")
+    pygame.font.init()
+    font = pygame.font.Font("Fonts/alterebro-pixel-font.ttf", 32)
     zone.load("Zones/home")
     """Game Loop"""
     frames = 0
@@ -18,7 +20,7 @@ def main():
         """Data"""
         zone.update()
         """Video"""
-        video.render(screen, frames, 60)
+        video.render(screen, frames, 60, font)
         frames = frames + 1
     """Cleanup"""
     pygame.quit()

@@ -7,6 +7,42 @@ sheets = [[
     pygame.image.load("Objects/Floor.png"),
     pygame.image.load("Objects/Floor.png")
     ],[
+    pygame.image.load("Objects/Fence.png"),
+    pygame.image.load("Objects/Fence.png")
+    ],[
+    pygame.image.load("Objects/Wall.png"),
+    pygame.image.load("Objects/Wall.png")
+    ],[
+    pygame.image.load("Objects/Decor0.png"),
+    pygame.image.load("Objects/Decor1.png")
+    ],[
+    pygame.image.load("Objects/Door0.png"),
+    pygame.image.load("Objects/Door1.png")
+    ],[
+    pygame.image.load("Objects/Effect0.png"),
+    pygame.image.load("Objects/Effect1.png")
+    ],[
+    pygame.image.load("Objects/Ground0.png"),
+    pygame.image.load("Objects/Ground1.png")
+    ],[
+    pygame.image.load("Objects/Hill0.png"),
+    pygame.image.load("Objects/Hill1.png")
+    ],[
+    pygame.image.load("Objects/Map0.png"),
+    pygame.image.load("Objects/Map1.png")
+    ],[
+    pygame.image.load("Objects/Ore0.png"),
+    pygame.image.load("Objects/Ore1.png")
+    ],[
+    pygame.image.load("Objects/Pit0.png"),
+    pygame.image.load("Objects/Pit1.png")
+    ],[
+    pygame.image.load("Objects/Trap0.png"),
+    pygame.image.load("Objects/Trap1.png")
+    ],[
+    pygame.image.load("Objects/Tree0.png"),
+    pygame.image.load("Objects/Tree1.png")
+    ],[
     pygame.image.load("Characters/Aquatic0.png"),
     pygame.image.load("Characters/Aquatic1.png")
     ],[
@@ -132,7 +168,7 @@ sheets = [[
 ]]
 
 def sprite(sheet):
-    return sheet > 0
+    return sheet > 1
 
 def tile((x, y)):
     """

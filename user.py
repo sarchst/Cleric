@@ -14,7 +14,7 @@ sheet = 0
 saved = False
 
 def mouse(event):
-    global choice, editing, selected, sheet
+    global choice, editing, selected, sheet, saved
     if event.type == pygame.MOUSEBUTTONDOWN:
         saved = False
         click = tile.tile(pygame.mouse.get_pos())
@@ -26,15 +26,11 @@ def mouse(event):
         # Mouse scroll down
         if editing and event.button == down:
             sheet -= 1
-            # Lower Clamp
-            if sheet < 0:
-                sheet = 0
+            if sheet < 0: sheet = 0
         # Mouse scroll up
         if editing and event.button == up:
             sheet += 1
-            # Upper Clamp
-            if sheet >= len(tile.sheets):
-                sheet = len(tile.sheets) - 1
+            if sheet >= len(tile.sheets): sheet = len(tile.sheets) - 1
         # Left mouse button was pushed on the editing screen
         elif event.button == left and editing:
             choice = click
@@ -45,10 +41,12 @@ def mouse(event):
         selected = None
 
 def keyboard(event):
-    global done
+    global done, saved
     if event.type == pygame.QUIT:
         done = True
     elif event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_F1:
+            done = True
         if event.key == pygame.K_F5:
             zone.save("Zones/home")
             saved = True
