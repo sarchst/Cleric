@@ -2,59 +2,26 @@ import pygame
 import tile
 import zone
 import user
-
-def render(screen, frames, fps):
-    x = (frames / (fps / 2)) % 2
-    # Cat Menu.
-    if user.editingScreen:
-        screen.fill((0, 0, 0))
-        screen.blit(tile.cats[x], (0, 0))
-    # Game Map.
-    elif not user.editingScreen:
-        # Terrain.
-        for key, value in zone.terrain.iteritems():
-            screen.blit(tile.floor[x], tile.rect(key), tile.rect(value))
-        # Sprites.
-        for key, value in zone.sprites.iteritems():
-            screen.blit(tile.cats[x], tile.rect(key), tile.rect(value))
-    pygame.display.flip()
-    pygame.time.wait(1000 / fps)
+import video
 
 def main():
-    """
-    Setup
-    """
+    """Setup"""
     pygame.init()
-    screen = pygame.display.set_mode(tile.pixel((10, 10)))
+    screen = pygame.display.set_mode(tile.pixel((40, 30)))
     pygame.display.set_caption("Cleric")
     zone.load("Zones/home")
-    """
-    Game loop
-    """
+    """Game Loop"""
     frames = 0
     while not user.done:
-        """
-        Input
-        """
-        user.getInput()
-        """
-        Data
-        """
-        if not user.editingScreen and user.select:
-            zone.sprites[user.select] = user.choice
-
-        """
-        Output
-        """
-        render(screen, frames, 60)
+        """Input"""
+        user.input()
+        """Data"""
+        zone.update()
+        """Video"""
+        video.render(screen, frames, 60)
         frames = frames + 1
-    """
-    Cleanup
-    """
+    """Cleanup"""
     pygame.quit()
 
-"""
-Cleric
-  A game about... nothing yet, really. We're still deciding that.
-"""
+"""Cleric"""
 main()
