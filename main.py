@@ -14,7 +14,7 @@ def main():
     zone.load("Zones/home")
     """Game Loop"""
     frames = 0
-    while not user.done:
+    while not user.public.done:
         """Input"""
         user.input()
         """Data"""

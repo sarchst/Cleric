@@ -17,11 +17,11 @@ sprites = {
 
 def update():
     global terrain, sprites
-    if not user.editing and user.selected:
-        if tile.sprite(user.sheet):
-            sprites[user.selected] = Thing(user.choice, user.sheet)
+    if not user.public.editing and user.public.selected:
+        if tile.sprite(user.public.sheet):
+            sprites[user.public.selected] = Thing(user.public.choice, user.public.sheet)
         else:
-            terrain[user.selected] = Thing(user.choice, user.sheet)
+            terrain[user.public.selected] = Thing(user.public.choice, user.public.sheet)
 
 def load(name):
     global terrain, sprites
