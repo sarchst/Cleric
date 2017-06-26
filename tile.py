@@ -1,8 +1,5 @@
 import pygame
 
-width = 16
-
-# I underestimated how many of these there were...
 sheets = [[
     pygame.image.load("Objects/Floor.png"),
     pygame.image.load("Objects/Floor.png")
@@ -166,6 +163,8 @@ sheets = [[
     pygame.image.load("GUI/GUI0.png"),
     pygame.image.load("GUI/GUI1.png")
 ]]
+
+width = 16
 
 def sprite(sheet):
     return sheet > 1

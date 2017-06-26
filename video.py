@@ -3,8 +3,14 @@ import user
 import zone
 import tile
 
-def render(screen, frames, fps, font):
-    x = (frames / (fps / 2)) % 2
+class private:
+    """
+    Private attributes.
+    """
+    frames = 0
+
+def render(screen, font):
+    x = private.frames % 2
     screen.fill((0, 0, 0))
     # Editing Menu
     if user.public.editing:
@@ -12,12 +18,14 @@ def render(screen, frames, fps, font):
     # Game Map
     elif not user.public.editing:
         # Terrain
-        for coord, thing in zone.terrain.iteritems():
-            screen.blit(tile.sheets[thing.sheet][x], tile.rect(coord), tile.rect(thing.tile))
+        for coord, thing in zone.public.terrain.iteritems():
+            screen.blit(tile.sheets[thing.sheet][x],\
+                tile.rect(coord), tile.rect(thing.tile))
         # Sprites
-        for coord, thing in zone.sprites.iteritems():
-            screen.blit(tile.sheets[thing.sheet][x], tile.rect(coord), tile.rect(thing.tile))
+        for coord, thing in zone.public.sprites.iteritems():
+            screen.blit(tile.sheets[thing.sheet][x],\
+                tile.rect(coord), tile.rect(thing.tile))
     if user.public.saved:
         screen.blit(font.render("Saved!", 0, (255, 255, 0)), (0,0))
     pygame.display.flip()
-    pygame.time.wait(1000 / fps)
+    private.frames += 1
