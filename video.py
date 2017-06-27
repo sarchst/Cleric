@@ -4,28 +4,30 @@ import zone
 import tile
 
 class private:
-    """
-    Private attributes.
-    """
-    frames = 0
+    renders = 0
 
 def render(screen, font):
-    x = private.frames % 2
+    x = private.renders % 2
     screen.fill((0, 0, 0))
     # Editing Menu
     if user.public.editing:
-        screen.blit(tile.sheets[user.public.sheet][x], (0, 0))
+        frame = tile.sheets[user.public.sheet][x]
+        screen.blit(frame, (0, 0))
     # Game Map
     elif not user.public.editing:
-        # Terrain
-        for coord, thing in zone.public.terrain.iteritems():
-            screen.blit(tile.sheets[thing.sheet][x],\
-                tile.rect(coord), tile.rect(thing.tile))
-        # Sprites
-        for coord, thing in zone.public.sprites.iteritems():
-            screen.blit(tile.sheets[thing.sheet][x],\
-                tile.rect(coord), tile.rect(thing.tile))
+        # Layers
+        for index in range(zone.public.thickness):
+            layer = zone.public.layers[index]
+            for coord, thing in layer.iteritems():
+                frame = tile.sheets[thing.sheet][x]
+                screen.blit(frame, tile.rect(coord), tile.rect(thing.tile))
+    # Saved text
     if user.public.saved:
-        screen.blit(font.render("Saved!", 0, (255, 255, 0)), (0,0))
+        screen.blit(font.render("Saved!",\
+            0, (255, 255, 0)), (0,0))
+    # Editing screen sheet text
+    if user.public.editing:
+        screen.blit(font.render(str(user.public.sheet),\
+            0, (255, 255, 0)), tile.pixel((21, 0)))
     pygame.display.flip()
-    private.frames += 1
+    private.renders += 1
