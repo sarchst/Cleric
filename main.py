@@ -1,167 +1,200 @@
-import pygame
 import os
+import pygame
 
-def tile((x, y)):
-    """Returns a tile tuple from a pixel tuple"""
-    return (x / 16, y / 16)
-
-def pixel((x, y)):
-    """Returns a pixel tuple from a tile tuple"""
-    return (x * 16, y * 16)
-
-def square((x, y)):
-    """ """
-    return (pixel((x, y)), (16, 16))
-
-class Catalog:
-    """Holds all tile art sheets by chapter"""
-    def __init__(self):
-        # All tile art sheets
-        self.sheets = []
-        # Number of sheets per chapter
-        self.chapters = []
-        # Load self on creation
-        self.load()
-
-    def load(self):
-        """Populates catalog"""
-        for dir in ["0", "1", "2", "3", "4", "5"]:
-            for root, dirs, files in os.walk(dir):
-                for file in sorted(files):
-                    name = dir + "/" + file
-                    sheet = pygame.image.load(name)
-                    self.sheets.append(sheet)
-            self.chapters.append(len(files))
-
-    def bookmark(self, user):
-        """Returns the chapter of the provided page"""
-        if user.page < sum(self.chapters[:1]):
-            return 0
-        if user.page < sum(self.chapters[:2]):
-            return 1
-        if user.page < sum(self.chapters[:3]):
-            return 2
-        if user.page < sum(self.chapters[:4]):
-            return 3
-        if user.page < sum(self.chapters[:5]):
-            return 4
-        if user.page < sum(self.chapters[:6]):
-            return 5
-
-
-class World:
-    """Holds all tile art placements"""
-    def __init__(self):
-        self.layers = [ {}, {}, {}, {}, {}, {} ]
-
-    def place(self, user, catalog):
-        if user.select is None:
-            return
-        chapter = catalog.bookmark(user)
-        self.layers[chapter][user.select] = user.pick
-        print self.layers
-
+# The user - That's you!
 class User:
-    """Handles keyboard and mouse input"""
     def __init__(self):
-        # User is looking at tile art catalog
+        # Scroll wheel index
+        self.scroll_wheel = 0
+        # Selected map pixel
+        self.map_pixel = None
+        # Selected catalog pixel
+        self.cat_pixel = None
+        # User is viewing the catalog
         self.catalogging = False
-        # Art catalog page user is looking at
-        self.page = 0
-        # Tile art that user picked when looking at art catalog
-        self.pick = (0, 0)
-        # Location user clicked on the game map
-        self.select = None
-        # The user wants to stop playing
+        # User wishes to quit
         self.done = False
 
-    def mouse(self, event, catalog):
-        """Handles all mouse events for the user"""
-        if event.type == pygame.MOUSEBUTTONUP:
-            click = pygame.mouse.get_pos()
-            # Left mouse button
-            if event.button == 1:
-                if self.catalogging:
-                    self.pick = tile(click)
-                else:
-                    self.select = tile(click)
+    def serve_keyboard(self, event):
+        # User pushes F1 wanting to quit
+        if event.key == pygame.K_F1:
+            self.done = True
+        # An example of how to use key events for
+        # future reference
+        if event.key == pygame.K_a:
+            pass
+
+    def serve_mouse(self, event, catalog):
+        cursor = pygame.mouse.get_pos()
+        # The selected map pixel will always revert to None
+        # and must be set with the left mouse
+        # button when the user is not catalogging
+        self.map_pixel = None
+        # Left mouse button
+        if event.button == 1:
+            if self.catalogging:
+                # Pick a catalog pixel and stop looking at the catalog
+                self.cat_pixel = cursor
                 self.catalogging = False
-            # Middle mouse button
-            elif event.button == 2:
-                pass
-            # Right mouse button
-            elif event.button == 3:
-                self.catalogging = True
-            # Scroll wheel up
-            elif event.button == 4 and self.catalogging:
-                self.page += 2
-                if self.page >= len(catalog.sheets):
-                    self.page = len(catalog.sheets) - 2
-            # Scroll wheel down
-            elif event.button == 5 and self.catalogging:
-                self.page -= 2
-                if self.page < 0:
-                    self.page = 0
-        else:
-            self.select = None
+            else:
+                # Pick a map pixel if the catalog is not being looked at
+                self.map_pixel= cursor
+        # Middle mouse buton press - a temporary place holder
+        if event.button == 2:
+            pass
+        # Right mouse button press - user is now looking at the catalog
+        if event.button == 3:
+            self.catalogging = True
+        # Scroll wheel up only when viewing catalog
+        if event.button == 4:
+            if self.catalogging:
+                # Every catalog page is doubled up for animation
+                # which we will add later
+                self.scroll_wheel += 2
+                # Upper clamp if user scrolls out of upper bounds
+                if self.scroll_wheel >= catalog.page_count:
+                    self.scroll_wheel = catalog.page_count - 2
+        # Scroll wheel down only when viewing catalog
+        if event.button == 5:
+            if self.catalogging:
+                self.scroll_wheel -= 2
+                # Lower clamp if user scrolls out of lower bounds
+                if self.scroll_wheel < 0:
+                    self.scroll_wheel = 0
 
-    def keyboard(self, event):
-        """Handles all keyboard events for the user"""
+    def get_input(self, catalog):
+        expected = [pygame.QUIT, pygame.MOUSEBUTTONUP, pygame.KEYUP]
+        # Wait here for one of the expected events to occur
+        event = pygame.event.wait()
+        while event.type not in expected:
+            event = pygame.event.wait()
+        # User hits the 'X' button of a window wanting to quit
+        if event.type == pygame.QUIT:
+            self.done = False
+        # Service user mouse event on the up stroke
+        if event.type == pygame.MOUSEBUTTONUP:
+            self.serve_mouse(event, catalog)
+        # Service user keyboard event on the up stroke
         if event.type == pygame.KEYUP:
-            if event.key == pygame.K_F1:
-                self.done = True
+            self.serve_keyboard(event)
 
-    def input(self, catalog):
-        """User did something with either the keyboard or mouse"""
-        event = pygame.event.wait() # Waits here until user does something
-        self.mouse(event, catalog)
-        self.keyboard(event)
+# The catalog - all sprite artwork is stored in the catalog
+class Catalog:
+    def __init__(self, root):
+        # One sprite artwork image constitutes a page.
+        # These pages are loaded into this list for the renderer
+        self.pages = []
+        # The overall page count is kept for future reference
+        self.page_count = 0
+        # Pages are segregated into chapters.
+        # This list holds the number of pages per chapter
+        self.chapter_size = []
+        # This list keeps track of the available chapters
+        self.chapters = [0, 1, 2, 3, 4, 5]
+        # This object, when instantiated, will load itself
+        # at creation with a chapters folder directory
+        # containing all the sprite artwork.
+        for chapter in self.chapters:
+            parent = root + "/" + str(chapter)
+            imgs = sorted(os.listdir(parent))
+            for img in imgs:
+                page = pygame.image.load(parent + "/" + img)
+                self.pages.append(page)
+            self.chapter_size.append(len(imgs))
+            self.page_count = len(self.pages)
 
+    # This function returns the chapter when given a page number.
+    def get_chapter(self, page_number):
+        for chapter in self.chapters:
+            if page_number < sum(self.chapter_size[:chapter + 1]):
+                return chapter
+        return None
+
+# Tiles hold a catalog pixel and a map pixel.
+# Tiles also hold the page number and chapter of the catalog.
+class Tile:
+    def __init__(self, user, catalog):
+        self.cat_pixel = user.cat_pixel
+        self.map_pixel = user.map_pixel
+        self.page_number = user.scroll_wheel
+        self.chapter = catalog.get_chapter(self.page_number)
+
+# The video class renders catalog artwork to the display.
 class Video:
-    """Handles display updates"""
-    def __init__(self):
-        pygame.init()
-        pygame.display.set_caption("Cleric")
-        pygame.font.init()
-        self.screen = pygame.display.set_mode(pixel((40, 30)))
-        self.font = pygame.font.Font("fonts/SDS_8x8.ttf", 16)
+    def __init__(self, res):
+        self.screen = pygame.display.set_mode(res)
+        # Renders are done sequentially by layer.
+        # Catalog sprites, by chapter, are moved to video layers prior to the render.
+        # This allows for more intricate sprites, like door frames, to render
+        # overtop of other sprites, like grass blades and kaitjies, without clipping.
+        self.layers = [ {}, {}, {}, {}, {}, {} ]
+        self.black = (0, 0, 0)
+        # The sprite width is modified here
+        self.sprite_width = 16
+        # The sprite width dictates the sprite area
+        self.sprite_area = (self.sprite_width, self.sprite_width)
 
-    def show_catalog(self, catalog, user):
-        sheet = catalog.sheets[user.page]
-        self.screen.blit(sheet, (0, 0))
+    # Pixels can be translated to grid co-ordinates for dictionaries keys
+    def to_grid(self, pixel):
+        return tuple(int(i / self.sprite_width) for i in pixel)
 
-    def show_game(self, catalog, user, world):
-        for chapter in range(len(catalog.chapters)):
-            layer = world.layers[chapter]
-            for game_tile, catalog_tile in layer.iteritems():
-                sheet = catalog.sheets[user.page]
-                self.screen.blit(sheet, square(game_tile), square(catalog_tile))
+    # Grid co-ordinates can be translated to pixels for rendering
+    def to_pixel(self, grid):
+        return tuple(int(i * self.sprite_width) for i in grid)
 
-    def render(self):
+    # Mixing these two gives a snap function for rounding down a pixel co-ordinate
+    def snap(self, pixel):
+        return self.to_pixel(self.to_grid(pixel))
+
+    # This function populates the layer dictionary with a tile
+    def lay(self, tile):
+        self.layers[tile.chapter][self.to_grid(tile.map_pixel)] = tile
+
+    # For you to figure out, sarchy - use pickle again, and see if
+    # you can figure out a way to have the user object command this save
+    # method to save the layer information to the disk
+    def save(self):
+        pass
+
+    # Same goes for load
+    def load(self):
+        pass
+
+    # This method shows the catalog
+    def show_catalog(self, user, catalog):
+        self.screen.fill(self.black)
+        page = catalog.pages[user.scroll_wheel]
+        top_left = (0, 0)
+        self.screen.blit(page, top_left)
         pygame.display.flip()
 
-    def wipe(self):
-        self.screen.fill((0, 0, 0))
+    # This method shows the game map
+    def show_map(self, catalog):
+        self.screen.fill(self.black)
+        for layer in self.layers:
+            for grid, tile in layer.iteritems():
+                page = catalog.pages[tile.page_number]
+                self.screen.blit(page,
+                        (self.snap(tile.map_pixel), self.sprite_area),
+                        (self.snap(tile.cat_pixel), self.sprite_area))
+        pygame.display.flip()
 
+# And here we go - we build all the objects here and have them
+# communicate with one another
 def main():
-    # Setup
-    video = Video()
+    pygame.init()
+    pygame.display.set_caption("Cleric")
+    video = Video((640, 480))
+    catalog = Catalog("dawnlike")
     user = User()
-    world = World()
-    catalog = Catalog()
-    # Loop
     while not user.done:
-        video.wipe()
-        user.input(catalog)
-        world.place(user, catalog)
+        user.get_input(catalog)
+        if user.map_pixel != None and user.cat_pixel != None:
+            video.lay(Tile(user, catalog))
         if user.catalogging:
-            video.show_catalog(catalog, user)
+            video.show_catalog(user, catalog)
         else:
-            video.show_game(catalog, user, world)
-
-        video.render()
-    # Cleanup
+            video.show_map(catalog)
     pygame.quit()
 
-"""Cleric"""
 main()
