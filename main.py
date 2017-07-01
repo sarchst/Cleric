@@ -44,12 +44,13 @@ class User:
         if event.button == 4:
             if self.catalogging:
                 self.scroll_wheel += catalog.animations_per_tile
-                self.clamp(catalog)
         # Scroll wheel down
         if event.button == 5:
             if self.catalogging:
                 self.scroll_wheel -= catalog.animations_per_tile
-                self.clamp(catalog)
+        # Scroll wheel clamp
+        if event.button in [4, 5]:
+            self.clamp(catalog)
 
     def get_input(self, catalog):
         # Wait here until any keyboard or mouse event occurs
@@ -136,12 +137,12 @@ class Video:
     def wipe(self):
         self.screen.fill(self.black)
 
-    def buffer_highlighter(self, user, catalog):
+    def buffer_selector(self, user, catalog):
         gui_page = catalog.pages[catalog.page_count - 1]
-        highlighter_pixel = self.to_pixel((10, 0))
-        highlighter_pixel_rect = (highlighter_pixel, self.tile_size)
-        cursor_pixel_rect = self.snap(user.cursor_pixel)
-        self.screen.blit(gui_page, cursor_pixel_rect, highlighter_pixel_rect)
+        selector_pixel = self.to_pixel((10, 0))
+        selector_pixel_rect = (selector_pixel, self.tile_size)
+        cursor_pixel = self.snap(user.cursor_pixel)
+        self.screen.blit(gui_page, cursor_pixel, selector_pixel_rect)
 
     def buffer_catalog(self, user, catalog):
         page = catalog.pages[user.scroll_wheel]
@@ -172,7 +173,7 @@ def main():
             video.buffer_catalog(user, catalog)
         else:
             video.buffer_map(catalog)
-        video.buffer_highlighter(user, catalog)
+        video.buffer_selector(user, catalog)
         video.update()
     pygame.quit()
 
