@@ -138,10 +138,10 @@ class Video:
 
     def buffer_highlighter(self, user, catalog):
         gui_page = catalog.pages[catalog.page_count - 1]
-        border_pixel = self.to_pixel((10, 0))
-        border_pixel_rect = (border_pixel, self.tile_size)
+        highlighter_pixel = self.to_pixel((10, 0))
+        highlighter_pixel_rect = (highlighter_pixel, self.tile_size)
         cursor_pixel_rect = self.snap(user.cursor_pixel)
-        self.screen.blit(gui_page, cursor_pixel_rect, border_pixel_rect)
+        self.screen.blit(gui_page, cursor_pixel_rect, highlighter_pixel_rect)
 
     def buffer_catalog(self, user, catalog):
         page = catalog.pages[user.scroll_wheel]
