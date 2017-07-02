@@ -3,74 +3,78 @@ import pygame
 
 class User:
     def __init__(self):
+        # The scroll wheel value
         self.scroll_wheel = 0
-        self.map_pixel = None
-        self.cat_pixel = None
+        # The selected pixel of the game map
+        self.map_pixel_selected = None
+        # The selected pixel of the catalog
+        self.cat_pixel_selected = None
+        # The current pixel of the mouse
         self.cursor_pixel = None
-        self.catalogging = False
-        self.done = False
-
-    def clamp(self, catalog):
-        # Upper bounds
-        if self.scroll_wheel >= catalog.page_count:
-            self.scroll_wheel = catalog.page_count - catalog.animations_per_tile
-        # Lower bounds
-        if self.scroll_wheel < 0:
-            self.scroll_wheel = 0
+        # The user is on the catalog page
+        self.is_catalogging = False
+        # The user is done playing the game
+        self.is_done = False
 
     def serve_keyboard(self, event):
+        # The user pushed 'X' to close the window
+        if event.type == pygame.QUIT:
+            self.is_done = True
+        # The user pushed F1 wanting to quit.
+        # Could use escape, but breaks pygame
+        # if escape and caps lock are reversed
         if event.key == pygame.K_F1:
-            self.done = True
-        # Example key press
+            self.is_done = True
+        # Example key press for future reference
         if event.key == pygame.K_a:
             pass
 
-    def serve_mouse_buttons(self, event, catalog):
-        self.map_pixel = None
-        # Left mouse button
+    def serve_mouse(self, event):
+        # The selected map pixel must stay None if no event
+        # occured. The catalog selection must be persistent
+        # and should be set to None
+        self.map_pixel_selected = None
+        # Left mouse button was pressed
         if event.button == 1:
-            if self.catalogging:
-                self.cat_pixel = self.cursor_pixel
-                self.catalogging = False
+            if self.is_catalogging:
+                self.cat_pixel_selected = self.cursor_pixel
+                self.is_catalogging = False
             else:
-                self.map_pixel= self.cursor_pixel
-        # Middle mouse button
+                self.map_pixel_selected = self.cursor_pixel
+        # Middle mouse button was pressed
         if event.button == 2:
             pass
-        # Right mouse button
+        # Right mouse button was pressed
         if event.button == 3:
-            self.catalogging = True
-        # Scroll wheel up
+            self.is_catalogging = True
+        # Scroll wheel up was pressed
         if event.button == 4:
-            if self.catalogging:
-                self.scroll_wheel += catalog.animations_per_tile
-        # Scroll wheel down
+            if self.is_catalogging:
+                self.scroll_wheel += 1
+        # Scroll wheel down was pressed
         if event.button == 5:
-            if self.catalogging:
-                self.scroll_wheel -= catalog.animations_per_tile
-        # Scroll wheel clamp
-        if event.button in [4, 5]:
-            self.clamp(catalog)
+            if self.is_catalogging:
+                self.scroll_wheel -= 1
 
-    def get_input(self, catalog):
-        # Wait here until any keyboard or mouse event occurs
+    def get_input(self):
+        # Wait here until any event occurs
         event = pygame.event.wait()
-        # Try again if the event was a mouse move event
-        # otherwise a full screen render will occur everytime the
-        # mouse is moved, and that will kill the poor little CPU
-        while event.type == pygame.MOUSEMOTION:
+        # A full screen render will occur everytime the
+        # mouse is moved, and that will kill the poor little CPU,
+        # so wait for a key press or mouse press event
+        while event.type not in [pygame.MOUSEBUTTONUP, pygame.KEYUP]:
             event = pygame.event.wait()
+        # Now service the mouse press event
         self.cursor_pixel = pygame.mouse.get_pos()
-        # Now service the mouse and keyboard
-        if event.type == pygame.QUIT:
-            self.done = False
         if event.type == pygame.MOUSEBUTTONUP:
-            self.serve_mouse_buttons(event, catalog)
+            self.serve_mouse(event)
+        # ...Or the key press event
         if event.type == pygame.KEYUP:
             self.serve_keyboard(event)
 
 class Catalog:
     def __init__(self):
+        self.page_number = 0
         self.pages = []
         self.page_count = 0
         self.chapter_size = []
@@ -87,18 +91,30 @@ class Catalog:
             self.chapter_size.append(len(imgs))
             self.page_count = len(self.pages)
 
-    def get_chapter(self, page_number):
+    def get_chapter(self):
         for chapter in self.chapters:
-            if page_number < sum(self.chapter_size[:chapter + 1]):
+            if self.page_number < sum(self.chapter_size[:chapter + 1]):
                 return chapter
         return None
 
+    def bound(self, user):
+        self.page_number = self.animations_per_tile * user.scroll_wheel
+        # Upper bound
+        if self.page_number >= self.page_count:
+            self.page_number = self.page_count - self.animations_per_tile
+        # Lower bound
+        if self.page_number < 0:
+            self.page_number = 0
+        # Force scroll wheel into place
+        user.scroll_wheel = self.page_number / self.animations_per_tile
+
+
 class Link:
     def __init__(self, user, catalog):
-        self.cat_pixel = user.cat_pixel
-        self.map_pixel = user.map_pixel
-        self.page_number = user.scroll_wheel
-        self.chapter = catalog.get_chapter(self.page_number)
+        self.cat_pixel_selected = user.cat_pixel_selected
+        self.map_pixel_selected = user.map_pixel_selected
+        self.page_number = catalog.page_number
+        self.chapter = catalog.get_chapter()
 
 class Video:
     def __init__(self, res):
@@ -122,7 +138,7 @@ class Video:
         return self.to_pixel(tile)
 
     def create(self, link):
-        map_tile = self.to_tile(link.map_pixel)
+        map_tile = self.to_tile(link.map_pixel_selected)
         self.layers[link.chapter][map_tile] = link
 
     def save(self):
@@ -131,30 +147,33 @@ class Video:
     def load(self):
         pass
 
-    def update(self):
+    def flip(self):
         pygame.display.flip()
 
     def wipe(self):
         self.screen.fill(self.black)
 
-    def buffer_selector(self, user, catalog):
+    def blit_selector(self, user, catalog):
+        # The GUI page is the very last page of the catalog
         gui_page = catalog.pages[catalog.page_count - 1]
+        # The pixel of the selctor tile is at (10, 0) of the GUI page
         selector_pixel = self.to_pixel((10, 0))
         selector_pixel_rect = (selector_pixel, self.tile_size)
+        # The selector tile is blitted to the position of the cursor
         cursor_pixel = self.snap(user.cursor_pixel)
         self.screen.blit(gui_page, cursor_pixel, selector_pixel_rect)
 
-    def buffer_catalog(self, user, catalog):
-        page = catalog.pages[user.scroll_wheel]
+    def blit_catalog(self, catalog):
+        page = catalog.pages[catalog.page_number]
         self.screen.blit(page, self.top_left)
 
-    def buffer_map(self, catalog):
+    def blit_map(self, catalog):
         for layer in self.layers:
             for tile in layer:
                 link = layer[tile]
                 page = catalog.pages[link.page_number]
-                map_pixel_rect = (self.snap(link.map_pixel), self.tile_size)
-                cat_pixel_rect = (self.snap(link.cat_pixel), self.tile_size)
+                map_pixel_rect = (self.snap(link.map_pixel_selected), self.tile_size)
+                cat_pixel_rect = (self.snap(link.cat_pixel_selected), self.tile_size)
                 self.screen.blit(page, map_pixel_rect, cat_pixel_rect)
 
 def main():
@@ -164,17 +183,18 @@ def main():
     catalog = Catalog()
     catalog.load("dawnlike")
     user = User()
-    while not user.done:
-        user.get_input(catalog)
+    while not user.is_done:
+        user.get_input()
+        catalog.bound(user)
         video.wipe()
-        if user.map_pixel and user.cat_pixel:
+        if user.map_pixel_selected and user.cat_pixel_selected:
             video.create(Link(user, catalog))
-        if user.catalogging:
-            video.buffer_catalog(user, catalog)
+        if user.is_catalogging:
+            video.blit_catalog(catalog)
         else:
-            video.buffer_map(catalog)
-        video.buffer_selector(user, catalog)
-        video.update()
+            video.blit_map(catalog)
+        video.blit_selector(user, catalog)
+        video.flip()
     pygame.quit()
 
 main()
