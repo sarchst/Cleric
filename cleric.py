@@ -81,8 +81,9 @@ class User:
         # A full screen render will occur everytime the
         # mouse is moved, and that will kill the poor little CPU,
         # so wait for a key press or mouse press event
+        events = [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.KEYDOWN]
         event = pygame.event.wait()
-        while event.type not in [pygame.MOUSEBUTTONUP, pygame.KEYDOWN]:
+        while event.type not in events:
             event = pygame.event.wait()
         # Now service the mouse press event
         self.cursor_pixel = pygame.mouse.get_pos()
