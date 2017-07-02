@@ -24,8 +24,26 @@ class User:
         # if escape and caps lock are reversed
         if event.key == pygame.K_F1:
             self.is_done = True
-        # Example key press for future reference
-        if event.key == pygame.K_a:
+        # Sarch Step 0:
+        #     Define variable self.brush_size (initialzed to 1)
+        #     within __init__ for this class and update it with
+        #     one of these key presses:
+        # 1 key press: 1x1 brush size
+        if event.key == pygame.K_1:
+            pass
+        # 2 key press: 3x3 brush size
+        if event.key == pygame.K_2:
+            pass
+        # 3 key press: 5x5 brush size
+        if event.key == pygame.K_3:
+            pass
+        # 4 key press: 7x7 brush size
+        if event.key == pygame.K_4:
+            pass
+        # Sarch Step 2:
+        #     Define variable self.is_saving (initialized to False)
+        #     within __init__ for this class and update it with F5:
+        if event.key == pygame.K_F5:
             pass
 
     def serve_mouse(self, event):
@@ -83,7 +101,7 @@ class Catalog:
         # The number of pages in the catalog
         self.page_count = 0
         # The number of pages in each chapter
-        self.chapter_pages = []
+        self.pages_per_chapter = []
         # Available chapters
         self.chapters = [0, 1, 2, 3, 4, 5]
         # The number of pages needed to animate a tile
@@ -108,7 +126,7 @@ class Catalog:
             for img in imgs:
                 page = pygame.image.load(parent + "/" + img)
                 self.pages.append(page)
-            self.chapter_pages.append(len(imgs))
+            self.pages_per_chapter.append(len(imgs))
         self.page_count = len(self.pages)
 
     def get_chapter(self):
@@ -116,7 +134,7 @@ class Catalog:
         Returns the chapter of the current catalog page
         """
         for chapter in self.chapters:
-            if self.page_number < sum(self.chapter_pages[:chapter + 1]):
+            if self.page_number < sum(self.pages_per_chapter[:chapter + 1]):
                 return chapter
         return None
 
@@ -166,10 +184,10 @@ class Video:
         # Rendering layers, one for each chapter, where each chapter
         # is a dictionary with the format:
         # (x, y) : Tile
-        # (x, y) is in grid format, not pixel format, such that one unique
-        # tile grid element can be used per entry
+        # (x, y) is in tile format, not pixel format, such that one unique
+        # tile tile element can be used per entry
         self.layers = [ {}, {}, {}, {}, {}, {} ]
-        # Tile width and size - required for pixel to grid transformations
+        # Tile width and size - required for pixel to tile transformations
         self.tile_width = 16
         self.tile_size = (self.tile_width, self.tile_width)
         # Screen margins
@@ -179,21 +197,21 @@ class Video:
 
     def to_tile(self, pixel):
         """
-        Transforms a pixel tuple coordinate to a grid tile coordinate
+        Transforms a pixel tuple coordinate to a tile tile coordinate
         eg: (70, 33) -> (4, 2)
         """
         return tuple(int(i / self.tile_width) for i in pixel)
 
     def to_pixel(self, tile):
         """
-        Transforms a grid tuple coordinate to a pixel tile coordinate
+        Transforms a tile tuple coordinate to a pixel tile coordinate
         eg: (4, 2) -> (64, 32)
         """
         return tuple(int(i * self.tile_width) for i in tile)
 
     def snap(self, pixel):
         """
-        Snaps a pixel coordinate to the grid:
+        Snaps a pixel coordinate to the tile:
         eg: (70, 33) -> (4, 2) -> (64, 32)
         """
         tile = self.to_tile(pixel)
@@ -203,6 +221,20 @@ class Video:
         """
         Places a tile link in a video layer
         """
+        # Sarch Step 1:
+        #     Pass the user object into this method and
+        #     and use the user.brush_size variable of the user object
+        #     to place a link for all the needed map_tiles
+        #     ...
+        #     For instance, if map_tile is (4,4):
+        #     If user.brush_size == 1 (for a 1x1 brush) set map_tile:
+        #     (4,4)
+        #     If user.brush_size == 2 (for a 3x3 brush) set map_tiles:
+        #     (3,3), (4,3), (5,3)
+        #     (3,4), (4,4), (5,4)
+        #     (5,5), (5,5), (5,5)
+        #     ...
+        #     and so on for all defined user.brush_sizes
         map_tile = self.to_tile(link.map_pixel_selected)
         self.layers[link.chapter][map_tile] = link
 
@@ -210,12 +242,18 @@ class Video:
         """
         Saves the video layers to a pickle file
         """
+        # Sarch Step 3:
+        #     Pass the user object into this method and use the
+        #     user.is_saving variable to save self.layers with pickle. 
+        #     Be sure to set user.is_saving = False after the save
         pass
 
     def load(self):
         """
         Loads the video layers from a pickle file
         """
+        # Sarch Step 4:
+        #     Load the pickle file from here. No need to pass in the user object.
         pass
 
     def blit_selector(self, user, catalog):
@@ -264,6 +302,10 @@ class Video:
         pygame.display.flip()
         self.renders += 1
 
+# Sarch Step 5:
+#    Update all modified functions here.
+#    Have video.load() load the saved pickle file after the
+#    video object is created.
 def cleric():
     """
     Copyright (c) Sarchen Starke, Gustav Louw
