@@ -1,19 +1,23 @@
-import os, pygame
+import os, pygame, operator
 
 class User:
     def __init__(self):
         # The scroll wheel value
         self.scroll_wheel = 0
-        # The selected pixel of the game map
+        # The selected (x, y) pixel of the game map
         self.map_pixel_selected = None
-        # The selected pixel of the catalog
+        # The selected (x, y) pixel of the catalog
         self.cat_pixel_selected = None
-        # The current pixel of the mouse
+        # The current (x, y) pixel of the mouse
         self.cursor_pixel = None
         # The user is on the catalog page
         self.is_catalogging = False
         # The user is done playing the game
         self.is_done = False
+        # The current camera (x, y) tile position
+        self.tile_offset = (0, 0)
+        # The tile offset pan with WASD
+        self.tile_pan = 5
 
     def serve_keyboard(self, event):
         # The user pushed 'X' to close the window
@@ -24,6 +28,23 @@ class User:
         # if escape and caps lock are reversed
         if event.key == pygame.K_F1:
             self.is_done = True
+        # Camera tile movement controls
+        # Up
+        if event.key == pygame.K_w:
+            self.tile_offset = tuple(map(operator.add,
+                self.tile_offset, (0, self.tile_pan)))
+        # Left
+        if event.key == pygame.K_a:
+            self.tile_offset = tuple(map(operator.add,
+                self.tile_offset, (self.tile_pan, 0)))
+        # Right
+        if event.key == pygame.K_d:
+            self.tile_offset = tuple(map(operator.sub,
+                self.tile_offset, (self.tile_pan, 0)))
+        # Down
+        if event.key == pygame.K_s:
+            self.tile_offset = tuple(map(operator.sub,
+                self.tile_offset, (0, self.tile_pan)))
         # Sarch Step 0:
         #     Define variable self.brush_size (initialzed to 1)
         #     within __init__ for this class and update it with
@@ -47,10 +68,6 @@ class User:
             pass
 
     def serve_mouse(self, event):
-        # The selected map pixel must stay None if no event
-        # occured. The catalog selection must be persistent
-        # and should be set to None
-        self.map_pixel_selected = None
         # Left mouse button was pressed
         if event.button == 1:
             if self.is_catalogging:
@@ -81,15 +98,23 @@ class User:
         # A full screen render will occur everytime the
         # mouse is moved, and that will kill the poor little CPU,
         # so wait for a key press or mouse press event
-        events = [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.KEYDOWN]
+        events = [
+            pygame.MOUSEBUTTONDOWN,
+            pygame.MOUSEBUTTONUP,
+            pygame.KEYDOWN
+        ]
         event = pygame.event.wait()
         while event.type not in events:
             event = pygame.event.wait()
-        # Now service the mouse press event
+        # The selected map pixel must stay None if no event
+        # occured. The catalog selection must be persistent
+        # and should be set to None
+        self.map_pixel_selected = None
+        # Now service the mouse press event only on the upstroke
         self.cursor_pixel = pygame.mouse.get_pos()
         if event.type == pygame.MOUSEBUTTONUP:
             self.serve_mouse(event)
-        # ...Or the key press event
+        # ...Or the key press event only on a down stroke
         if event.type == pygame.KEYDOWN:
             self.serve_keyboard(event)
 
@@ -118,8 +143,8 @@ class Catalog:
         Chapter 2: Characters
         ...
         Chapter 5: GUI
-        Rocks will always be rendered over terrain, characters always over rocks,
-        and the GUI always over everything.
+        Rocks will always be rendered over terrain, characters always
+        over rocks, and the GUI always over everything.
         """
         for chapter in self.chapters:
             parent = root + "/" + str(chapter)
@@ -142,8 +167,8 @@ class Catalog:
     def bound(self, user):
         """
         Sets the catalog page to that of the mouse scroll index.
-        Forces the mouse scroll index back into place if it exceeds the number
-        of pages of the catalog, or if it less than 0
+        Forces the mouse scroll index back into place if it
+        exceeds the number of pages of the catalog, or if it less than 0
         """
         self.page_number = self.pages_per_animation * user.scroll_wheel
         # Upper bound
@@ -176,10 +201,11 @@ class Link:
         self.page_number = catalog.page_number
         # The chapter of the catalog
         self.chapter = catalog.get_chapter()
+        # The tile offset of the camera at placement
+        self.tile_offset = user.tile_offset
 
 class Video:
-    def __init__(self, res):
-        self.screen = pygame.display.set_mode(res)
+    def __init__(self, pixel_res):
         # Number of frame renders since game start
         self.renders = 0
         # Rendering layers, one for each chapter, where each chapter
@@ -195,20 +221,26 @@ class Video:
         self.top_left = (0, 0)
         # Screen colors
         self.black = (0x00, 0x00, 0x00)
+        # Screen pixel resolution
+        self.pixel_res = pixel_res
+        # Screen tile resolution
+        self.tile_res = self.to_tile(pixel_res)
+        # Screen init
+        self.screen = pygame.display.set_mode(pixel_res)
 
     def to_tile(self, pixel):
         """
         Transforms a pixel tuple coordinate to a tile tile coordinate
         eg: (70, 33) -> (4, 2)
         """
-        return tuple(int(i / self.tile_width) for i in pixel)
+        return tuple(map(operator.div, pixel, self.tile_size))
 
     def to_pixel(self, tile):
         """
         Transforms a tile tuple coordinate to a pixel tile coordinate
         eg: (4, 2) -> (64, 32)
         """
-        return tuple(int(i * self.tile_width) for i in tile)
+        return tuple(map(operator.mul, tile, self.tile_size))
 
     def snap(self, pixel):
         """
@@ -222,6 +254,8 @@ class Video:
         """
         Places a tile link in a video layer
         """
+        map_tile_selected = self.to_tile(link.map_pixel_selected)
+        map_tile = tuple(map(operator.sub, map_tile_selected, link.tile_offset))
         # Sarch Step 1:
         #     Pass the user object into this method and
         #     and use the user.brush_size variable of the user object
@@ -236,7 +270,6 @@ class Video:
         #     (5,5), (5,5), (5,5)
         #     ...
         #     and so on for all defined user.brush_sizes
-        map_tile = self.to_tile(link.map_pixel_selected)
         self.layers[link.chapter][map_tile] = link
 
     def save(self):
@@ -277,16 +310,18 @@ class Video:
         page = catalog.pages[catalog.page_number]
         self.screen.blit(page, self.top_left)
 
-    def blit_map(self, catalog):
+
+    def blit_map(self, catalog, user):
         """
-        Buffers the map in the screen backbuffer
+        Buffers the map in the screen backbuffer with catalog tiles
         """
         animation = self.renders % 2
         for layer in self.layers:
             for tile in layer:
                 link = layer[tile]
+                camera = tuple(map(operator.add, tile, user.tile_offset))
                 page = catalog.pages[link.page_number + animation]
-                map_pixel_rect = (self.snap(link.map_pixel_selected), self.tile_size)
+                map_pixel_rect = self.to_pixel(camera)
                 cat_pixel_rect = (self.snap(link.cat_pixel_selected), self.tile_size)
                 self.screen.blit(page, map_pixel_rect, cat_pixel_rect)
 
@@ -330,7 +365,7 @@ def cleric():
         if user.is_catalogging:
             video.blit_catalog(catalog)
         else:
-            video.blit_map(catalog)
+            video.blit_map(catalog, user)
         video.blit_selector(user, catalog)
         video.flip()
     # Game done
