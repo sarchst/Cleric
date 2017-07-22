@@ -63,9 +63,7 @@ class User:
         # 4 key press: 7x7 brush size
         if event.key == pygame.K_4:
             self.brush_size = 4
-        # Sarch Step 2:
-        #     Define variable self.is_saving (initialized to False)
-        #     within __init__ for this class and update it with F5:
+
         if event.key == pygame.K_F5:
             self.is_saving = True 
 
@@ -255,7 +253,7 @@ class Video:
         tile = self.to_tile(pixel)
         return self.to_pixel(tile)
 
-    def place(self, link):
+    def place(self, link, user):
         """
         Places a tile link in a video layer
         """
@@ -263,20 +261,20 @@ class Video:
         map_tile = tuple(map(operator.sub, map_tile_selected, link.tile_offset))
 
         #1x1 
-        if link.brush_size == 1:
+        if user.brush_size == 1:
             self.layers[link.chapter][map_tile] = link
         #3x3
-        if link.brush_size == 2:
+        if user.brush_size == 2:
             for x in range(map_tile[0] - 1, map_tile[0] + 2):
 	            for y in range(map_tile[1] - 1, map_tile[1] + 2):
 	                self.layers[link.chapter][(x,y)] = link
         #5x5
-        if link.brush_size == 3:
+        if user.brush_size == 3:
             for x in range(map_tile[0] - 2, map_tile[0] + 3):
 	            for y in range(map_tile[1] - 2, map_tile[1] + 3):
 	                self.layers[link.chapter][(x,y)] = link
         #7x7 
-        if link.brush_size == 4:
+        if user.brush_size == 4:
             for x in range(map_tile[0] - 3, map_tile[0] + 4):
 	            for y in range(map_tile[1] - 3, map_tile[1] + 4):
 	                self.layers[link.chapter][(x,y)] = link
@@ -285,20 +283,15 @@ class Video:
         """
         Saves the video layers to a pickle file
         """
-        pickle.dump(self.layers, open("map", "w")) 
-        user.is_saving = False           
-        # Sarch Step 3:
-        #     Pass the user object into this method and use the
-        #     user.is_saving variable to save self.layers with pickle. 
-        #     Be sure to set user.is_saving = False after the save
+        if user.is_saving:
+            pickle.dump(self.layers, open("map", "w")) 
+            user.is_saving = False           
 
     def load(self):
         """
         Loads the video layers from a pickle file
         """
         return pickle.load(open("map", "r")) 
-        # Sarch Step 4:
-        #     Load the pickle file from here. No need to pass in the user object.
 
     def blit_selector(self, user, catalog):
         """
@@ -348,10 +341,6 @@ class Video:
         pygame.display.flip()
         self.renders += 1
 
-# Sarch Step 5:
-#    Update all modified functions here.
-#    Have video.load() load the saved pickle file after the
-#    video object is created.
 def cleric():
     """
     Copyright (c) Sarchen Starke, Gustav Louw
@@ -368,13 +357,12 @@ def cleric():
     while not user.is_done:
         # Input
         user.get_input()
-        if user.is_saving:
-            video.save(User())
+        video.save(user)
         catalog.bound(user)
         # Render
         video.blit_clear()
         if user.map_pixel_selected and user.cat_pixel_selected:
-            video.place(Link(user, catalog))
+            video.place(Link(user, catalog), user)
         if user.is_catalogging:
             video.blit_catalog(catalog)
         else:
