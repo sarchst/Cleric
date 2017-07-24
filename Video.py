@@ -1,6 +1,6 @@
 import operator
 import pygame
-import cPickle as pickle # So much faster!
+import cPickle as pickle
 
 class Video:
     def __init__(self, pixel_res):
@@ -82,7 +82,7 @@ class Video:
         """
         Saves the video layers to a pickle file
         """
-        pickle.dump(self.layers, open("map", "wb"))
+        pickle.dump(self.layers, open("map", "wb"), protocol = pickle.HIGHEST_PROTOCOL)
 
     def load(self):
         """
