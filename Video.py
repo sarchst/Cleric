@@ -113,6 +113,9 @@ class Video:
     def blit_map(self, catalog, user):
         """
         Buffers the map in the screen backbuffer with catalog tiles
+        NOTE:
+        Highly inneffecient! Blits off screen tiles. If map is huge
+        this will really kill performance!
         """
         animation = self.renders % 2
         for layer in self.layers:
