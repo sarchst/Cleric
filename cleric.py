@@ -3,19 +3,16 @@ from User import User
 from Catalog import Catalog
 from Link import Link
 
-"""
-Copyright (c) Sarchen Starke, Gustav Louw
-"""
-# Game setup
 video = Video((640, 480))
-# Sarch Step:
-# Remove the video.layers assignment and have
-# done inside video.load
-video.layers = video.load()
 catalog = Catalog()
-catalog.load("dawnlike")
 user = User()
+# Game load
+video.blit_title_screen()
+video.flip()
+video.load()
+catalog.load("dawnlike")
 # First frame display before game starts
+video.blit_clear()
 video.blit_map(catalog, user)
 video.flip()
 # Game loop
@@ -26,7 +23,10 @@ while not user.is_done:
     if user.is_saving:
         video.save()
         user.is_saving = False
-    # Render
+    if user.is_clearing_log:
+        del video.entries[:]
+        user.is_clearing_log = False
+    # Output
     video.blit_clear()
     if user.map_pixel_selected and user.cat_pixel_selected:
         video.place(Link(user, catalog), user)
@@ -35,6 +35,7 @@ while not user.is_done:
     else:
         video.blit_map(catalog, user)
     video.blit_selector(user, catalog)
+    video.blit_log()
     video.flip()
 # Cleanup
 video.off()

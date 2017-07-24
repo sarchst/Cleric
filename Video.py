@@ -6,7 +6,9 @@ class Video:
     def __init__(self, pixel_res):
         pygame.init()
         pygame.display.set_caption("Cleric")
+        self.font = pygame.font.Font("fonts/SDS_8x8.ttf", 8)
         self.renders = 0
+        self.font_height = self.font.size("dummy")[1]
         # Rendering layers, one for each chapter, where each chapter
         # is a dictionary with the format:
         # (x, y) : Tile
@@ -15,11 +17,15 @@ class Video:
         self.layers = [ {}, {}, {}, {}, {}, {} ]
         self.tile_width = 16
         self.tile_size = (self.tile_width, self.tile_width)
-        self.top_left = (0, 0)
-        self.black = (0x00, 0x00, 0x00)
         self.pixel_res = pixel_res
         self.tile_res = self.to_tile(pixel_res)
         self.screen = pygame.display.set_mode(pixel_res)
+        self.entries = []
+        # Location
+        self.top_left = (0, 0)
+        # Colors
+        self.black = (0x00, 0x00, 0x00)
+        self.yellow = (0xFF, 0xFF, 0x00)
 
     def to_tile(self, pixel):
         """
@@ -78,17 +84,46 @@ class Video:
 	            for y in range(map_tile[1] - 5, map_tile[1] + 6):
 	                self.layers[link.chapter][(x,y)] = link
 
+    def log(self, message):
+        """
+        Adds a message to the log.
+        Pops the head of the log if the log is longer than the display
+        """
+        self.entries.append(message)
+        if len(self.entries) * self.font_height > self.pixel_res[1]:
+            self.entries.pop(0)
+
     def save(self):
         """
         Saves the video layers to a pickle file
         """
         pickle.dump(self.layers, open("map", "wb"), protocol = pickle.HIGHEST_PROTOCOL)
+        self.log("Saved!")
 
     def load(self):
         """
         Loads the video layers from a pickle file
         """
-        return pickle.load(open("map", "rb"))
+        try:
+            self.layers = pickle.load(open("map", "rb"))
+        except:
+            self.log("No map file found...")
+
+    def blit_title_screen(self):
+        """
+        Blits title screen to display
+        """
+        message = "Loading one massive world..."
+        text = self.font.render(message, 0, self.yellow)
+        self.screen.blit(text, self.top_left)
+
+    def blit_log(self):
+        """
+        Blits the log to the screen
+        """
+        for line, entry in enumerate(self.entries):
+            text = self.font.render(entry, 0, self.yellow)
+            self.screen.blit(text, (0, line * self.font_height))
 
     def blit_selector(self, user, catalog):
         """

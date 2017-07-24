@@ -8,6 +8,7 @@ class User:
         self.cat_pixel_selected = None
         self.cursor_pixel = None
         self.is_catalogging = False
+        self.is_clearing_log = False
         self.is_done = False
         self.tile_offset = (0, 0)
         self.tile_pan = 5
@@ -60,9 +61,15 @@ class User:
         # 6 key press: 11x11 brush size
         if event.key == pygame.K_6:
             self.brush_size = 6
-        # Game saving
+        """
+        Misc
+        """
+        # Saving
         if event.key == pygame.K_F5:
-            self.is_saving = True 
+            self.is_saving = True
+        # Log clearing
+        if event.key == pygame.K_l and pygame.key.get_mods() == pygame.KMOD_LCTRL:
+            self.is_clearing_log = True
 
     def serve_mouse(self, event):
         # Left mouse button
