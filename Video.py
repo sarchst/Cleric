@@ -117,22 +117,30 @@ class Video:
         page = catalog.pages[catalog.page_number]
         self.screen.blit(page, self.top_left)
 
+    def blit_layer(self, coord, catalog, user):
+        """
+        Buffers one layer at screen coordinates in the screen backbuffer
+        """
+        tile = tuple(map(operator.sub, coord, user.tile_offset))
+        for layer in self.layers:
+            try:
+                link = layer[tile]
+            except:
+                continue
+            else:
+                animation = self.renders % 2
+                page = catalog.pages[link.page_number + animation]
+                map_pixel = self.to_pixel(coord)
+                cat_pixel_rect = (self.snap(link.cat_pixel_selected), self.tile_size)
+                self.screen.blit(page, map_pixel, cat_pixel_rect)
+
     def blit_map(self, catalog, user):
         """
         Buffers the map in the screen backbuffer with catalog tiles
-        NOTE:
-        Highly inneffecient! Blits off screen tiles. If map is huge
-        this will really kill performance!
         """
-        animation = self.renders % 2
-        for layer in self.layers:
-            for tile in layer:
-                link = layer[tile]
-                camera = tuple(map(operator.add, tile, user.tile_offset))
-                page = catalog.pages[link.page_number + animation]
-                map_pixel_rect = self.to_pixel(camera)
-                cat_pixel_rect = (self.snap(link.cat_pixel_selected), self.tile_size)
-                self.screen.blit(page, map_pixel_rect, cat_pixel_rect)
+        for x in range(0, self.tile_res[0]):
+            for y in range(0, self.tile_res[1]):
+                self.blit_layer((x, y), catalog, user)
 
     def blit_clear(self):
         """

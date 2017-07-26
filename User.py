@@ -97,7 +97,8 @@ class User:
 
     def get_input(self):
         """
-        Waits here for a mouse or key event
+        Waits here for a mouse or key event,
+        or for 0.25 seconds to elapse
         """
         events = [
             pygame.MOUSEBUTTONDOWN,
