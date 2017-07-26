@@ -52,13 +52,10 @@ class Video:
         """
         map_tile_selected = self.to_tile(link.map_pixel_selected)
         map_tile = tuple(map(operator.sub, map_tile_selected, link.tile_offset))
-        # 1x1
-        for z in range(1,7):
-            if user.brush_size == z:
-                for x in range(map_tile[0] - (z- 1), map_tile[0] + z):
-                    for y in range(map_tile[1] - (z-1), map_tile[1] + z):
-                        self.layers[link.chapter][(x,y)] = link
-									   
+        for x in range(map_tile[0] - (user.brush_size - 1), map_tile[0] + user.brush_size):
+            for y in range(map_tile[1] - (user.brush_size - 1), map_tile[1] + user.brush_size):
+                self.layers[link.chapter][(x,y)] = link
+
     def log(self, message):
         """
         Adds a message to the log.

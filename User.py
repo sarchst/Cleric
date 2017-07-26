@@ -1,7 +1,7 @@
 import pygame
 import operator
 import time
-start = time.time()
+
 class User:
     def __init__(self):
         self.scroll_wheel = 0
@@ -104,11 +104,12 @@ class User:
             pygame.MOUSEBUTTONUP,
             pygame.KEYDOWN
         ]
-        event = pygame.event.wait()
+        start = time.time()
+        event = pygame.event.poll()
         while event.type not in events:
             if time.time() - start > 0.25:
                 break
-            event = pygame.event.wait()
+            event = pygame.event.poll()
         # The selected map pixel must stay None if no event
         # occured. The catalog selection must be persistent
         self.map_pixel_selected = None
