@@ -52,38 +52,13 @@ class Video:
         """
         map_tile_selected = self.to_tile(link.map_pixel_selected)
         map_tile = tuple(map(operator.sub, map_tile_selected, link.tile_offset))
-        # Sarch Step:
-        # Condense this by removing all if statements
-        # and using a single x and y for loop
         # 1x1
-        if user.brush_size == 1:
-            self.layers[link.chapter][map_tile] = link
-        # 3x3
-        if user.brush_size == 2:
-            for x in range(map_tile[0] - 1, map_tile[0] + 2):
-	            for y in range(map_tile[1] - 1, map_tile[1] + 2):
-	                self.layers[link.chapter][(x,y)] = link
-        # 5x5
-        if user.brush_size == 3:
-            for x in range(map_tile[0] - 2, map_tile[0] + 3):
-	            for y in range(map_tile[1] - 2, map_tile[1] + 3):
-	                self.layers[link.chapter][(x,y)] = link
-        # 7x7 
-        if user.brush_size == 4:
-            for x in range(map_tile[0] - 3, map_tile[0] + 4):
-	            for y in range(map_tile[1] - 3, map_tile[1] + 4):
-	                self.layers[link.chapter][(x,y)] = link
-        # 9x9
-        if user.brush_size == 5:
-            for x in range(map_tile[0] - 4, map_tile[0] + 5):
-	            for y in range(map_tile[1] - 4, map_tile[1] + 5):
-	                self.layers[link.chapter][(x,y)] = link
-        # 11x11
-        if user.brush_size == 6:
-            for x in range(map_tile[0] - 5, map_tile[0] + 6):
-	            for y in range(map_tile[1] - 5, map_tile[1] + 6):
-	                self.layers[link.chapter][(x,y)] = link
-
+        for z in range(1,7):
+            if user.brush_size == z:
+                for x in range(map_tile[0] - (z- 1), map_tile[0] + z):
+                    for y in range(map_tile[1] - (z-1), map_tile[1] + z):
+                        self.layers[link.chapter][(x,y)] = link
+									   
     def log(self, message):
         """
         Adds a message to the log.

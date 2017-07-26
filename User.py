@@ -1,6 +1,7 @@
 import pygame
 import operator
-
+import time
+start = time.time()
 class User:
     def __init__(self):
         self.scroll_wheel = 0
@@ -105,12 +106,8 @@ class User:
         ]
         event = pygame.event.wait()
         while event.type not in events:
-            # Sarch Step:
-            # The entire game will wait here for a keyboard or
-            # mouse event before proceeding with all data updates
-            # and a full screen render.
-            # Find a way to break out of this loop after 0.25 seconds
-            # has elapsed.
+            if time.time() - start > 0.25:
+                break
             event = pygame.event.wait()
         # The selected map pixel must stay None if no event
         # occured. The catalog selection must be persistent
