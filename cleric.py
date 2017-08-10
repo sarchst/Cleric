@@ -23,6 +23,9 @@ while not user.is_done:
     if user.is_saving:
         video.save()
         user.is_saving = False
+    if user.is_erasing:
+        video.erase()
+        user.is_erasing = False
     if user.is_clearing_log:
         del video.entries[:]
         user.is_clearing_log = False

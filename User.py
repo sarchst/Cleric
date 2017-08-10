@@ -15,6 +15,7 @@ class User:
         self.tile_pan = 5
         self.brush_size = 1
         self.is_saving = False
+        self.is_erasing = False
 
     def serve_keyboard(self, event):
         # Quitting
@@ -71,6 +72,9 @@ class User:
         # Log clearing
         if event.key == pygame.K_l and pygame.key.get_mods() == pygame.KMOD_LCTRL:
             self.is_clearing_log = True
+		#Screen clearing
+        if event.key == pygame.K_F9:
+		    self.is_erasing = True
 
     def serve_mouse(self, event):
         # Left mouse button

@@ -71,6 +71,9 @@ class Video:
         """
         pickle.dump(self.layers, open("map", "wb"), protocol = pickle.HIGHEST_PROTOCOL)
         self.log("Saved!")
+    
+    def erase(self):
+        self.layers = [ {}, {}, {}, {}, {}, {} ]
 
     def load(self):
         """
