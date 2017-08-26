@@ -56,4 +56,3 @@ class Catalog:
             self.page_number = 0
         # Force scroll wheel into place
         user.scroll_wheel = self.page_number / self.pages_per_animation
-

@@ -1,8 +1,11 @@
-import pygame as pg
 import operator
 import time
+import pygame as pg
 
 class User:
+    """
+    For everything user input related
+    """
     def __init__(self):
         self.scroll_wheel = 0
         self.map_pixel_selected = None
@@ -16,65 +19,69 @@ class User:
         self.brush_size = 1
         self.is_saving = False
         self.is_erasing = False
+        self.page_scroll = 0
 
     def serve_keyboard(self, event):
-        # Quitting
+        # User quits
         if event.type == pg.QUIT:
             self.is_done = True
         if event.key == pg.K_F1:
             self.is_done = True
-        """
-        Camera tile movement controls
-        """
-        # Up
+        # (w)
         if event.key == pg.K_w:
-            self.tile_offset = tuple(map(operator.add,
-                self.tile_offset, (0, self.tile_pan)))
-        # Left
-        if event.key == pg.K_a:
-            self.tile_offset = tuple(map(operator.add,
-                self.tile_offset, (self.tile_pan, 0)))
-        # Right
-        if event.key == pg.K_d:
-            self.tile_offset = tuple(map(operator.sub,
-                self.tile_offset, (self.tile_pan, 0)))
-        # Down
+            # Catalog page scroll up
+            if self.is_catalogging:
+                self.page_scroll -= 1
+            else:
+                # Pan up
+                self.tile_offset = tuple(map(operator.add,\
+                    self.tile_offset, (0, self.tile_pan)))
+        # (s)
         if event.key == pg.K_s:
-            self.tile_offset = tuple(map(operator.sub,
-                self.tile_offset, (0, self.tile_pan)))
-        """
-        Brush size selection
-        """
-        # 1 key press: 1x1 brush size
+            # Catalog page scroll down
+            if self.is_catalogging:
+                self.page_scroll += 1
+            # Pan down
+            else:
+                self.tile_offset = tuple(map(operator.sub,\
+                    self.tile_offset, (0, self.tile_pan)))
+        # Locks the page scroll
+        if self.page_scroll < 0:
+            self.page_scroll = 0
+        # (a)
+        if event.key == pg.K_a:
+            # Pan left
+            self.tile_offset = tuple(map(operator.add,\
+                self.tile_offset, (self.tile_pan, 0)))
+        # (d)
+        if event.key == pg.K_d:
+            # Pan right
+            self.tile_offset = tuple(map(operator.sub,\
+                self.tile_offset, (self.tile_pan, 0)))
+        # (1) 1x1 brush size
         if event.key == pg.K_1:
             self.brush_size = 1
-        # 2 key press: 3x3 brush size
+        # (2) 3x3 brush size
         if event.key == pg.K_2:
             self.brush_size = 2
-        # 3 key press: 5x5 brush size
+        # (3) 5x5 brush size
         if event.key == pg.K_3:
             self.brush_size = 3
-        # 4 key press: 7x7 brush size
+        # (4) 7x7 brush size
         if event.key == pg.K_4:
             self.brush_size = 4
-        # 5 key press: 9x9 brush size
+        # (5) 9x9 brush size
         if event.key == pg.K_5:
             self.brush_size = 5
-        # 6 key press: 11x11 brush size
+        # (6) 11x11 brush size
         if event.key == pg.K_6:
             self.brush_size = 6
-        """
-        Misc
-        """
-        # Saving
+        # (F5) Saving
         if event.key == pg.K_F5:
             self.is_saving = True
-        # Log clearing
-        if event.key == pg.K_l and pg.key.get_mods() == pg.KMOD_LCTRL:
-            self.is_clearing_log = True
-		#Screen clearing
+        # (F9) Screen clearing
         if event.key == pg.K_F9:
-		    self.is_erasing = True
+            self.is_erasing = True
 
     def serve_mouse(self, event):
         # Left mouse button
@@ -86,7 +93,8 @@ class User:
                 self.map_pixel_selected = self.cursor_pixel
         # Middle mouse button
         if event.button == 2:
-            pass
+            # Clears the event log
+            self.is_clearing_log = True
         # Right mouse button
         if event.button == 3:
             self.is_catalogging = True
@@ -94,24 +102,22 @@ class User:
         if event.button == 4:
             if self.is_catalogging:
                 self.scroll_wheel += 1
+            # Resets catalog page scroll
+            self.page_scroll = 0
         # Scroll wheel down
         if event.button == 5:
             if self.is_catalogging:
                 self.scroll_wheel -= 1
+            # Resets catalog page scroll
+            self.page_scroll = 0
 
     def get_input(self):
         """
-        Waits here for a mouse or key event,
-        or for 0.25 seconds to elapse
+        Waits here for a mouse or key event or for 0.25 seconds to elapse
         """
-        events = [
-            pg.MOUSEBUTTONDOWN,
-            pg.MOUSEBUTTONUP,
-            pg.KEYDOWN
-        ]
         start = time.time()
         event = pg.event.poll()
-        while event.type not in events:
+        while event.type not in [pg.MOUSEBUTTONDOWN, pg.MOUSEBUTTONUP, pg.KEYDOWN]:
             if time.time() - start > 0.25:
                 break
             event = pg.event.poll()

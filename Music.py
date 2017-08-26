@@ -1,6 +1,9 @@
 import pygame as pg
 
 class Music:
+    """
+    For everything music related
+    """
     def __init__(self, track):
         pg.mixer.init()
         self.load(track)

@@ -3,7 +3,11 @@ from User import User
 from Catalog import Catalog
 from Link import Link
 from Music import Music
+import pygame as pg
 
+pg.init()
+pg.display.set_caption("Cleric")
+# Primary game objects
 video = Video((800, 480))
 catalog = Catalog()
 user = User()
@@ -35,7 +39,7 @@ while not user.is_done:
     if user.map_pixel_selected and user.cat_pixel_selected:
         video.place(Link(user, catalog), user)
     if user.is_catalogging:
-        video.blit_catalog(catalog)
+        video.blit_catalog(catalog, user)
     else:
         video.blit_map(catalog, user)
     video.blit_selector(user, catalog)

@@ -3,26 +3,27 @@ import pygame as pg
 import cPickle as pickle
 
 class Video:
+    """
+    For everything renderering related
+    """
     def __init__(self, pixel_res):
-        pg.init()
-        pg.display.set_caption("Cleric")
         self.font = pg.font.Font("fonts/SDS_8x8.ttf", 8)
         self.renders = 0
-        self.font_height = self.font.size("dummy")[1]
+        self.pixel_font_size = self.font.size(".")
         # Rendering layers, one for each chapter, where each chapter
         # is a dictionary with the format:
         # (x, y) : Tile
         # (x, y) is in tile format, not pixel format, such that one unique
         # tile tile element can be used per entry
         self.layers = [ {}, {}, {}, {}, {}, {} ]
-        self.tile_width = 32
-        self.tile_size = (self.tile_width, self.tile_width)
+        self.tile_size = (32, 32)
         self.pixel_res = pixel_res
         self.tile_res = self.to_tile(pixel_res)
         self.screen = pg.display.set_mode(pixel_res)
         self.entries = []
         # Location
         self.top_left = (0, 0)
+        self.bottom_right = tuple(map(operator.sub, self.pixel_res, self.pixel_font_size))
         # Colors
         self.black = (0x00, 0x00, 0x00)
         self.yellow = (0xFF, 0xFF, 0x00)
@@ -40,7 +41,7 @@ class Video:
         return tuple(map(operator.mul, tile, self.tile_size))
 
     def clear_log(self):
-        del video.entries[:]
+        del self.entries[:]
 
     def snap(self, pixel):
         """
@@ -65,7 +66,7 @@ class Video:
         Pops the head of the log if the log is longer than the display
         """
         self.entries.append(message)
-        if len(self.entries) * self.font_height > self.pixel_res[1]:
+        if len(self.entries) * self.pixel_font_size[1] > self.pixel_res[1]:
             self.entries.pop(0)
 
     def save(self):
@@ -94,8 +95,7 @@ class Video:
         """
         Blits title screen to display
         """
-        message = "Loading one massive world..."
-        text = self.font.render(message, 0, self.yellow)
+        text = self.font.render("Loading one massive world...", 0, self.yellow)
         self.screen.blit(text, self.top_left)
 
     def blit_log(self):
@@ -104,7 +104,7 @@ class Video:
         """
         for line, entry in enumerate(self.entries):
             text = self.font.render(entry, 0, self.yellow)
-            self.screen.blit(text, (0, line * self.font_height))
+            self.screen.blit(text, (0, line * self.pixel_font_size[1]))
 
     def blit_selector(self, user, catalog):
         """
@@ -119,18 +119,22 @@ class Video:
         cursor_pixel = self.snap(user.cursor_pixel)
         self.screen.blit(gui_page, cursor_pixel, selector_pixel_rect)
 
-    def blit_catalog(self, catalog):
+    def blit_catalog(self, catalog, user):
         """
         Buffers a catalog page in the screen backbuffer
         """
-        page = catalog.pages[catalog.page_number]
-        self.screen.blit(page, self.top_left)
+        animation = self.renders % 2
+        page = catalog.pages[catalog.page_number + animation]
+        page_pixel_rect = ((0, user.page_scroll * self.pixel_res[1]), self.pixel_res)
+        self.screen.blit(page, self.top_left, page_pixel_rect)
+        # Displays the page scroll at the bottom right hand of the screen
+        text = self.font.render(str(user.page_scroll), 0, self.yellow)
+        self.screen.blit(text, self.bottom_right)
 
-    def blit_layer(self, coord, catalog, user):
+    def blit_layer(self, coord, catalog, tile):
         """
         Buffers one layer at screen coordinates in the screen backbuffer
         """
-        tile = tuple(map(operator.sub, coord, user.tile_offset))
         for layer in self.layers:
             try:
                 link = layer[tile]
@@ -140,7 +144,9 @@ class Video:
                 animation = self.renders % 2
                 page = catalog.pages[link.page_number + animation]
                 map_pixel = self.to_pixel(coord)
-                cat_pixel_rect = (self.snap(link.cat_pixel_selected), self.tile_size)
+                cat_pixel_scroll = (0, link.page_scroll * self.pixel_res[1])
+                cat_pixel = tuple(map(operator.add, link.cat_pixel_selected, cat_pixel_scroll))
+                cat_pixel_rect = (self.snap(cat_pixel), self.tile_size)
                 self.screen.blit(page, map_pixel, cat_pixel_rect)
 
     def blit_map(self, catalog, user):
@@ -149,7 +155,9 @@ class Video:
         """
         for x in range(0, self.tile_res[0]):
             for y in range(0, self.tile_res[1]):
-                self.blit_layer((x, y), catalog, user)
+                coord = (x, y)
+                tile = tuple(map(operator.sub, coord, user.tile_offset))
+                self.blit_layer(coord, catalog, tile)
 
     def blit_clear(self):
         """
@@ -165,4 +173,7 @@ class Video:
         self.renders += 1
 
     def off(self):
+        """
+        Kills pygame
+        """
         pg.quit()
