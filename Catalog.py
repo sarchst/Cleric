@@ -39,7 +39,6 @@ class Catalog:
         for chapter in self.chapters:
             if self.page_number < sum(self.pages_per_chapter[:chapter + 1]):
                 return chapter
-        return None
 
     def bound(self, user):
         """
