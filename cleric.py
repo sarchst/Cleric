@@ -4,21 +4,21 @@ from Catalog import Catalog
 from Link import Link
 from Music import Music
 
-video = Video((800, 600))
+video = Video((800, 480))
 catalog = Catalog()
 user = User()
-# Game load
+# Game loads, music starts, user welcomed with loading screen
 video.blit_title_screen()
 video.flip()
 video.load()
 catalog.load("dawnlike")
-# First frame display before game starts
+# First frame displays before game starts
 video.blit_clear()
 video.blit_map(catalog, user)
 video.flip()
-# Game loop
+# Game loops until the user stops playing
 while not user.is_done:
-    # Input
+    # User input - keyboard / mouse
     user.get_input()
     catalog.bound(user)
     if user.is_saving:
@@ -30,7 +30,7 @@ while not user.is_done:
     if user.is_clearing_log:
         video.clear_log()
         user.is_clearing_log = False
-    # Output
+    # Output for user - video
     video.blit_clear()
     if user.map_pixel_selected and user.cat_pixel_selected:
         video.place(Link(user, catalog), user)
@@ -41,5 +41,5 @@ while not user.is_done:
     video.blit_selector(user, catalog)
     video.blit_log()
     video.flip()
-# Cleanup
+# User stopped - Cleanup
 video.off()

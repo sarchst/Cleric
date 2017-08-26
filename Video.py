@@ -1,12 +1,12 @@
 import operator
-import pygame
+import pygame as pg
 import cPickle as pickle
 
 class Video:
     def __init__(self, pixel_res):
-        pygame.init()
-        pygame.display.set_caption("Cleric")
-        self.font = pygame.font.Font("fonts/SDS_8x8.ttf", 8)
+        pg.init()
+        pg.display.set_caption("Cleric")
+        self.font = pg.font.Font("fonts/SDS_8x8.ttf", 8)
         self.renders = 0
         self.font_height = self.font.size("dummy")[1]
         # Rendering layers, one for each chapter, where each chapter
@@ -19,7 +19,7 @@ class Video:
         self.tile_size = (self.tile_width, self.tile_width)
         self.pixel_res = pixel_res
         self.tile_res = self.to_tile(pixel_res)
-        self.screen = pygame.display.set_mode(pixel_res)
+        self.screen = pg.display.set_mode(pixel_res)
         self.entries = []
         # Location
         self.top_left = (0, 0)
@@ -74,8 +74,11 @@ class Video:
         """
         pickle.dump(self.layers, open("map", "wb"), protocol = pickle.HIGHEST_PROTOCOL)
         self.log("Saved!")
-    
+
     def erase(self):
+        """
+        Kills all video layers
+        """
         self.layers = [ {}, {}, {}, {}, {}, {} ]
 
     def load(self):
@@ -158,8 +161,8 @@ class Video:
         """
         Transfers the screen backbuffer to the display
         """
-        pygame.display.flip()
+        pg.display.flip()
         self.renders += 1
 
     def off(self):
-        pygame.quit()
+        pg.quit()
