@@ -8,7 +8,7 @@ import pygame as pg
 pg.init()
 pg.display.set_caption("Cleric")
 # Primary game objects
-video = Video((800, 512))
+video = Video((800, 480))
 catalog = Catalog()
 user = User()
 # Game loads, music starts, user welcomed with loading screen
