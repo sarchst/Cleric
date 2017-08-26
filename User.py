@@ -20,6 +20,7 @@ class User:
         self.is_saving = False
         self.is_erasing = False
         self.page_scroll = 0
+        self.is_querying = False
 
     def serve_keyboard(self, event):
         # User quits
@@ -27,6 +28,10 @@ class User:
             self.is_done = True
         if event.key == pg.K_F1:
             self.is_done = True
+        # (q)
+        if event.key == pg.K_q:
+            # Query
+            self.is_querying = True;
         # (w)
         if event.key == pg.K_w:
             # Catalog page scroll up

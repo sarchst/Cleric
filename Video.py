@@ -10,11 +10,6 @@ class Video:
         self.font = pg.font.Font("fonts/SDS_8x8.ttf", 8)
         self.renders = 0
         self.pixel_font_size = self.font.size(".")
-        # Rendering layers, one for each chapter, where each chapter
-        # is a dictionary with the format:
-        # (x, y) : Tile
-        # (x, y) is in tile format, not pixel format, such that one unique
-        # tile tile element can be used per entry
         self.layers = [ {}, {}, {}, {}, {}, {} ]
         self.tile_size = (32, 32)
         self.pixel_res = pixel_res
@@ -41,6 +36,9 @@ class Video:
         return tuple(map(operator.mul, tile, self.tile_size))
 
     def clear_log(self):
+        """
+        Clears the display log history
+        """
         del self.entries[:]
 
     def snap(self, pixel):
@@ -58,7 +56,7 @@ class Video:
         map_tile = tuple(map(operator.sub, map_tile_selected, link.tile_offset))
         for x in range(map_tile[0] - (user.brush_size - 1), map_tile[0] + user.brush_size):
             for y in range(map_tile[1] - (user.brush_size - 1), map_tile[1] + user.brush_size):
-                self.layers[link.chapter][(x,y)] = link
+                self.layers[link.chapter][x, y] = link
 
     def log(self, message):
         """
@@ -68,6 +66,17 @@ class Video:
         self.entries.append(message)
         if len(self.entries) * self.pixel_font_size[1] > self.pixel_res[1]:
             self.entries.pop(0)
+
+    def query(self, user, catalog):
+        """
+        Logs catalog attributes to the screen
+        """
+        self.log("tile %r: page %r: chapter %r: scroll %r" % (
+            self.to_tile(user.cursor_pixel),
+            catalog.page_number,
+            catalog.get_chapter(),
+            user.page_scroll
+        ))
 
     def save(self):
         """
@@ -111,11 +120,12 @@ class Video:
         Buffers the mouse selector tile in the screen backbuffer
         """
         # The GUI page is the very last page of the catalog and pixel of
-        # the selctor tile is at (10, 0) of the GUI page
+        # the selctor tile is at (10, 0)
         gui_page = catalog.pages[catalog.page_count - 1]
         selector_pixel = self.to_pixel((10, 0))
         selector_pixel_rect = (selector_pixel, self.tile_size)
-        # The selector tile is blitted to the position of the cursor
+        # The selector tile is blitted to the position of the cursor.
+        # A dragging effect will occur with selector as it technically is a sprte
         cursor_pixel = self.snap(user.cursor_pixel)
         self.screen.blit(gui_page, cursor_pixel, selector_pixel_rect)
 

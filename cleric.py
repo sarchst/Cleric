@@ -25,15 +25,22 @@ while not user.is_done:
     # User input - keyboard / mouse
     user.get_input()
     catalog.bound(user)
+    # Saving
     if user.is_saving:
         video.save()
         user.is_saving = False
+    # Erases video log
     if user.is_erasing:
         video.erase()
         user.is_erasing = False
+    # Clears video log
     if user.is_clearing_log:
         video.clear_log()
         user.is_clearing_log = False
+    # Queury a tile
+    if user.is_catalogging and user.is_querying:
+        video.query(user, catalog)
+        user.is_querying = False
     # Output for user - video
     video.blit_clear()
     if user.map_pixel_selected and user.cat_pixel_selected:
