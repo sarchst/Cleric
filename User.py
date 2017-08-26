@@ -88,11 +88,12 @@ class User:
         if event.key == pg.K_F9:
             self.is_erasing = True
 
-    def serve_mouse(self, event):
+    def serve_mouse(self, event, pixel_res):
         # Left mouse button
         if event.button == 1:
             if self.is_catalogging:
-                self.cat_pixel_selected = self.cursor_pixel
+                self.cat_pixel_selected = tuple(map(operator.add,\
+                    self.cursor_pixel, (0, self.page_scroll * pixel_res[1])))
                 self.is_catalogging = False
             else:
                 self.map_pixel_selected = self.cursor_pixel
@@ -116,7 +117,7 @@ class User:
             # Resets catalog page scroll
             self.page_scroll = 0
 
-    def get_input(self):
+    def get_input(self, pixel_res):
         """
         Waits here for a mouse or key event or for 0.25 seconds to elapse
         """
@@ -132,7 +133,7 @@ class User:
         # Mouse service
         self.cursor_pixel = pg.mouse.get_pos()
         if event.type == pg.MOUSEBUTTONUP:
-            self.serve_mouse(event)
+            self.serve_mouse(event, pixel_res)
         # Keyboard service
         if event.type == pg.KEYDOWN:
             self.serve_keyboard(event)

@@ -16,4 +16,3 @@ class Link:
         self.page_number = catalog.page_number
         self.chapter = catalog.get_chapter()
         self.tile_offset = user.tile_offset
-        self.page_scroll = user.page_scroll

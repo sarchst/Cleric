@@ -11,6 +11,7 @@ class Video:
         self.renders = 0
         self.pixel_font_size = self.font.size(".")
         self.layers = [ {}, {}, {}, {}, {}, {} ]
+        # Tile size must remain constant - No other tile sizes are supported
         self.tile_size = (32, 32)
         self.pixel_res = pixel_res
         self.tile_res = self.to_tile(pixel_res)
@@ -45,8 +46,7 @@ class Video:
         """
         Snaps a pixel coordinate to the tile:
         """
-        tile = self.to_tile(pixel)
-        return self.to_pixel(tile)
+        return self.to_pixel(self.to_tile(pixel))
 
     def place(self, link, user):
         """
@@ -137,9 +137,6 @@ class Video:
         page = catalog.pages[catalog.page_number + animation]
         page_pixel_rect = ((0, user.page_scroll * self.pixel_res[1]), self.pixel_res)
         self.screen.blit(page, self.top_left, page_pixel_rect)
-        # Displays the page scroll at the bottom right hand of the screen
-        text = self.font.render(str(user.page_scroll), 0, self.yellow)
-        self.screen.blit(text, self.bottom_right)
 
     def blit_layer(self, coord, catalog, tile):
         """
@@ -154,9 +151,7 @@ class Video:
                 animation = self.renders % 2
                 page = catalog.pages[link.page_number + animation]
                 map_pixel = self.to_pixel(coord)
-                cat_pixel_scroll = (0, link.page_scroll * self.pixel_res[1])
-                cat_pixel = tuple(map(operator.add, link.cat_pixel_selected, cat_pixel_scroll))
-                cat_pixel_rect = (self.snap(cat_pixel), self.tile_size)
+                cat_pixel_rect = (self.snap(link.cat_pixel_selected), self.tile_size)
                 self.screen.blit(page, map_pixel, cat_pixel_rect)
 
     def blit_map(self, catalog, user):

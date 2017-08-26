@@ -8,7 +8,7 @@ import pygame as pg
 pg.init()
 pg.display.set_caption("Cleric")
 # Primary game objects
-video = Video((800, 480))
+video = Video((800, 512))
 catalog = Catalog()
 user = User()
 # Game loads, music starts, user welcomed with loading screen
@@ -23,7 +23,7 @@ video.flip()
 # Game loops until the user stops playing
 while not user.is_done:
     # User input - keyboard / mouse
-    user.get_input()
+    user.get_input(video.pixel_res)
     catalog.bound(user)
     # Saving
     if user.is_saving:
