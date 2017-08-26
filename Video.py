@@ -15,7 +15,7 @@ class Video:
         # (x, y) is in tile format, not pixel format, such that one unique
         # tile tile element can be used per entry
         self.layers = [ {}, {}, {}, {}, {}, {} ]
-        self.tile_width = 16
+        self.tile_width = 32
         self.tile_size = (self.tile_width, self.tile_width)
         self.pixel_res = pixel_res
         self.tile_res = self.to_tile(pixel_res)
@@ -38,6 +38,9 @@ class Video:
         Transforms a tile tuple coordinate to a pixel tile coordinate
         """
         return tuple(map(operator.mul, tile, self.tile_size))
+
+    def clear_log(self):
+        del video.entries[:]
 
     def snap(self, pixel):
         """

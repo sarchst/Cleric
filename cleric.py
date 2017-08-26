@@ -2,8 +2,9 @@ from Video import Video
 from User import User
 from Catalog import Catalog
 from Link import Link
+from Music import Music
 
-video = Video((640, 480))
+video = Video((800, 600))
 catalog = Catalog()
 user = User()
 # Game load
@@ -27,7 +28,7 @@ while not user.is_done:
         video.erase()
         user.is_erasing = False
     if user.is_clearing_log:
-        del video.entries[:]
+        video.clear_log()
         user.is_clearing_log = False
     # Output
     video.blit_clear()

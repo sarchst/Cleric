@@ -1,4 +1,4 @@
-import pygame
+import pygame as pg
 import os
 
 class Catalog:
@@ -27,7 +27,7 @@ class Catalog:
             parent = root + "/" + str(chapter)
             imgs = sorted(os.listdir(parent))
             for img in imgs:
-                page = pygame.image.load(parent + "/" + img)
+                page = pg.transform.scale2x(pg.image.load(parent + "/" + img))
                 self.pages.append(page)
             self.pages_per_chapter.append(len(imgs))
         self.page_count = len(self.pages)
