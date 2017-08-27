@@ -51,4 +51,4 @@ while not user.is_done:
     video.blit_log()
     video.flip()
 # User stopped - Cleanup
-video.off()
+pg.quit()

@@ -111,11 +111,7 @@ class Video:
         if user.is_catalogging:
             pixel = tuple(map(operator.add,\
                 user.cursor_pixel, (0, user.page_scroll * self.pixel_res[1])))
-            self.log("tile %r: page %r: chapter %r" % (
-                self.to_tile(pixel),
-                catalog.page_number,
-                catalog.get_chapter()
-            ))
+            self.log("tile %r" % (self.to_tile(pixel),))
         else:
             tile = tuple(map(operator.sub,\
                 self.to_tile(user.cursor_pixel),\
@@ -126,7 +122,7 @@ class Video:
                 except:
                     pass
                 else:
-                    self.log("tile %r: page %r: chapter %r" %
+                    self.log("tile %r: page %3r: chapter %r" %
                         (self.to_tile(link.cat_pixel_selected), link.page_number, link.chapter))
             self.log("")
 
@@ -179,6 +175,7 @@ class Video:
         """
         Buffers a catalog page in the screen backbuffer
         """
+        # Tile map portion
         animation = self.renders % 2
         page = catalog.pages[catalog.page_number + animation]
         pixel_offset = (0, user.page_scroll * self.pixel_res[1])
@@ -227,9 +224,3 @@ class Video:
         """
         pg.display.flip()
         self.renders += 1
-
-    def off(self):
-        """
-        Kills pygame
-        """
-        pg.quit()
