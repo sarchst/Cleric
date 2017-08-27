@@ -11,15 +11,14 @@ pg.display.set_caption("Cleric")
 video = Video((800, 480))
 catalog = Catalog()
 user = User()
-# Game loads, music starts, user welcomed with loading screen
-video.blit_title_screen()
-video.flip()
-video.load()
+# Catalog loads all sprite images
 catalog.load("dawnlike")
 # First frame displays before game starts
-video.blit_clear()
+video.log("Loading world...")
+video.load()
 video.blit_map(catalog, user)
 video.flip()
+video.log("Welcome to Cleric!")
 # Game loops until the user stops playing
 while not user.is_done:
     # User input - keyboard / mouse
@@ -27,7 +26,7 @@ while not user.is_done:
     catalog.bound(user)
     # Saving
     if user.is_saving:
-        video.save()
+        video.save(catalog)
         user.is_saving = False
     # Erases video log
     if user.is_erasing:
@@ -38,7 +37,7 @@ while not user.is_done:
         video.clear_log()
         user.is_clearing_log = False
     # Queury a tile
-    if user.is_catalogging and user.is_querying:
+    if user.is_querying:
         video.query(user, catalog)
         user.is_querying = False
     # Output for user - video
