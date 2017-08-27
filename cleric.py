@@ -14,7 +14,6 @@ user = User()
 # Catalog loads all sprite images
 catalog.load("dawnlike")
 # First frame displays before game starts
-video.log("Loading world...")
 video.load()
 video.blit_map(catalog, user)
 video.flip()

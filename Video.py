@@ -10,7 +10,6 @@ class Video:
     def __init__(self, pixel_res):
         self.font = pg.font.Font("fonts/SDS_8x8.ttf", 8)
         self.renders = 0
-        self.pixel_font_size = self.font.size(".")
         self.layers = [ {}, {}, {}, {}, {}, {} ]
         # Tile size must remain constant - No other tile sizes are supported
         self.pixel_tile_size = (32, 32)
@@ -20,7 +19,6 @@ class Video:
         self.entries = []
         # Location
         self.top_left = (0, 0)
-        self.bottom_right = tuple(map(operator.sub, self.pixel_res, self.pixel_font_size))
         # Colors
         self.black = (0x00, 0x00, 0x00)
         self.yellow = (0xFF, 0xFF, 0x00)
@@ -80,7 +78,6 @@ class Video:
         but will still affect collision detection during gameplay.
         This method removes all black tiles links
         """
-        self.log("Collecting garbage...")
         garbage_tiles = 0
         for layer in self.layers:
             mirror = copy.deepcopy(layer)
@@ -102,28 +99,36 @@ class Video:
         """
         Adds a message to the log.
         Pops the head of the log if the log is longer than the display.
-        Instantly updates display with log message
         """
         self.entries.append(message)
-        if len(self.entries) * self.pixel_font_size[1] > self.pixel_res[1]:
+        if len(self.entries) * self.font.size(".")[1] > self.pixel_res[1]:
             self.entries.pop(0)
-        self.blit_log()
-        self.flip()
 
     def query(self, user, catalog):
         """
         Logs catalog or game map tile attributes
         """
         if user.is_catalogging:
-            tile = tuple(map(operator.add,\
+            pixel = tuple(map(operator.add,\
                 user.cursor_pixel, (0, user.page_scroll * self.pixel_res[1])))
             self.log("tile %r: page %r: chapter %r" % (
-                self.to_tile(tile),
+                self.to_tile(pixel),
                 catalog.page_number,
                 catalog.get_chapter()
             ))
         else:
-            pass
+            tile = tuple(map(operator.sub,\
+                self.to_tile(user.cursor_pixel),\
+                user.tile_offset))
+            for layer in self.layers:
+                try:
+                    link = layer[tile]
+                except:
+                    pass
+                else:
+                    self.log("tile %r: page %r: chapter %r" %
+                        (self.to_tile(link.cat_pixel_selected), link.page_number, link.chapter))
+            self.log("")
 
     def save(self, catalog):
         """
@@ -154,7 +159,7 @@ class Video:
         """
         for line, entry in enumerate(self.entries):
             text = self.font.render(entry, 0, self.yellow)
-            self.screen.blit(text, (0, line * self.pixel_font_size[1]))
+            self.screen.blit(text, (0, line * self.font.size(entry)[1]))
 
     def blit_selector(self, user, catalog):
         """
@@ -176,8 +181,14 @@ class Video:
         """
         animation = self.renders % 2
         page = catalog.pages[catalog.page_number + animation]
-        page_pixel_rect = ((0, user.page_scroll * self.pixel_res[1]), self.pixel_res)
+        pixel_offset = (0, user.page_scroll * self.pixel_res[1])
+        page_pixel_rect = (pixel_offset, self.pixel_res)
         self.screen.blit(page, self.top_left, page_pixel_rect)
+        # Page number and chapter
+        message = "page %r: chapter %r" % (catalog.page_number, catalog.get_chapter())
+        text = self.font.render(message, 0, self.yellow)
+        bottom_right = tuple(map(operator.sub, self.pixel_res, self.font.size(message)))
+        self.screen.blit(text, bottom_right)
 
     def blit_layers(self, coord, catalog, user):
         """
