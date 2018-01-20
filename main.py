@@ -2,6 +2,7 @@ from Video import Video
 from User import User
 from Catalog import Catalog
 from Link import Link
+from Music import Music
 import pygame as pg
 
 def main():
@@ -14,6 +15,7 @@ def main():
     # SARCH:
     # Instantiate the music class here. Load sand_theme.mp3
     # and then play it.
+    music = Music("music/sand_theme.mp3")
     # Catalog loads all sprite images
     catalog.load("dawnlike")
     # First frame displays before game starts
