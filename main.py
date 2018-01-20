@@ -5,16 +5,13 @@ from Link import Link
 from Music import Music
 import pygame as pg
 
-def main():
+if __name__ == "__main__":
     pg.init()
     pg.display.set_caption("Cleric")
     # Primary game objects
     video = Video((800, 480))
     catalog = Catalog()
     user = User()
-    # SARCH:
-    # Instantiate the music class here. Load sand_theme.mp3
-    # and then play it.
     music = Music("music/sand_theme.mp3")
     # Catalog loads all sprite images
     catalog.load("dawnlike")
@@ -57,6 +54,3 @@ def main():
         video.flip()
     # User stopped - Cleanup
     pg.quit()
-
-if __name__ == "__main__":
-    main();
