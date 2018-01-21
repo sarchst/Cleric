@@ -9,7 +9,7 @@ if __name__ == "__main__":
     pg.init()
     pg.display.set_caption("Cleric")
     # Primary game objects
-    video = Video((800, 480))
+    video = Video((30 * 32, 21 * 32))
     catalog = Catalog()
     user = User()
     music = Music("music/sand_theme.mp3")
