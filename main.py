@@ -4,6 +4,7 @@ from Catalog import Catalog
 from Link import Link
 from Music import Music
 import pygame as pg
+import random
 
 if __name__ == "__main__":
     pg.init()
@@ -12,7 +13,9 @@ if __name__ == "__main__":
     video = Video((30 * 32, 21 * 32))
     catalog = Catalog()
     user = User()
-    music = Music("music/sand_theme.mp3")
+     
+    music = Music()
+    
     # Catalog loads all sprite images
     catalog.load("dawnlike")
     # First frame displays before game starts

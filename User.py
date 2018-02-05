@@ -23,10 +23,10 @@ class User:
         self.is_querying = False
 
     def serve_keyboard(self, event):
-        # User quits (END or X button on screen)
+        # User quits (F1 or X button on screen)
         if event.type == pg.QUIT:
             self.is_done = True
-        if event.key == pg.K_END:
+        if event.key == pg.K_F1:
             self.is_done = True
         # (q)
         if event.key == pg.K_q:
